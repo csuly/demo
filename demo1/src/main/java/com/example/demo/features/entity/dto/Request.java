@@ -1,0 +1,17 @@
+package com.example.demo.features.entity.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.List;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+public class Request {
+    private int sourceSize;
+    private List<QueryItem> sources;
+}
