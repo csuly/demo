@@ -199,7 +199,7 @@ public class FeaturesController {
         }
     }
 
-    @PostMapping("/getFnData")
+    @PostMapping("/getFeatureNormalizedData")
     public Result GetFnData(@RequestBody Request request)
     {
         List<Features> data = new ArrayList<>();

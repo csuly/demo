@@ -1,14 +1,19 @@
 package com.example.demo.points.entity.VO;
 
 public record PointsVO(
+        int id,
         int batch,
         int source,
         double lat,
         double lon,
-        double time,
-        double vel,
-        double cou,
-        boolean highlight
+        double lat_len,
+        double lon_len,
+        double duration,
+        double avg_accel,
+        double avg_auguvel,
+        double avg_cou,
+        double sparsity
+
 ) {
 }
 
