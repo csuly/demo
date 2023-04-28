@@ -8,6 +8,7 @@ from sklearn.metrics import pairwise_distances
 from sklearn.manifold import MDS
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 import umap.umap_ as umap
 from sklearn.preprocessing import MinMaxScaler
 import sys
@@ -36,6 +37,7 @@ def createTable(target_scene):
     "projection_x_PCA float,"+"projection_y_PCA float,"+\
     "projection_x_TSNE float,"+"projection_y_TSNE float,"+\
     "projection_x_UMAP float,"+"projection_y_UMAP float,"+\
+    "projection_x_LDA float,"+"projection_y_LDA float,"+\
     "PRIMARY KEY (id) );"
     )
 
@@ -88,7 +90,7 @@ def saveDate(info,target_scene):
       " (source,batch,time_min,time_max,duration,min_lon,max_lon,min_lat,max_lat,avg_vel,avg_accel,avg_cou,"+\
       "avg_anguvel,points,sparsity,projection_x_ISOMAP,projection_y_ISOMAP,projection_x_KPCA,projection_y_KPCA,"+\
       "projection_x_MDS,projection_y_MDS,projection_x_PCA,projection_y_PCA,"+\
-      "projection_x_TSNE,projection_y_TSNE,projection_x_UMAP,projection_y_UMAP) VALUES("+\
+      "projection_x_TSNE,projection_y_TSNE,projection_x_UMAP,projection_y_UMAP,projection_x_LDA,projection_y_LDA) VALUES("+\
       str(row['source'])+","+str(row['batch'])+","+str(row['time_min'])+","+str(row['time_max'])+","+str(row['duration'])+","+\
       str(row['min_lon'])+","+str(row['max_lon'])+","+str(row['min_lat'])+","+str(row['max_lat'])+","+str(row['avg_vel'])+","+\
       str(row['avg_accel'])+","+str(row['avg_cou'])+","+str(row['avg_anguvel'])+","+str(row['points'])+","+\
@@ -97,7 +99,8 @@ def saveDate(info,target_scene):
       str(row['projection_x_MDS'])+","+str(row['projection_y_MDS'])+","+\
       str(row['projection_x_PCA'])+","+str(row['projection_y_PCA'])+","+\
       str(row['projection_x_TSNE'])+","+str(row['projection_y_TSNE'])+","+\
-      str(row['projection_x_UMAP'])+","+str(row['projection_y_UMAP'])+")"
+      str(row['projection_x_UMAP'])+","+str(row['projection_y_UMAP'])+","+\
+      str(row['projection_x_LDA'])+","+str(row['projection_y_LDA'])+")"
       mycursor.execute(update)
       mydb.commit()
       # if index%10==0 and index!=0:
@@ -175,6 +178,12 @@ def umap_reduction(X, n_neighbors=15, min_dist=0.1, n_components=2):
     X_umap_norm = scaler.fit_transform(X_umap)
     return X_umap_norm
 
+def lda(XMat,y):
+  lda = LinearDiscriminantAnalysis(n_components=2)
+  X_lda = lda.fit_transform(XMat,y)
+  result = (X_lda - np.min(X_lda, axis=0)) / (np.max(X_lda, axis=0) - np.min(X_lda, axis=0))
+  return result
+
 # 读取数据
 # scene_index = 3223
 scene_index = int(sys.argv[1])  # 定义场景文件序号
@@ -182,12 +191,14 @@ createTable(scene_index)
 # X = pd.read_csv(f'../data/data_{scene_index}/场景-{scene_index}-features-normalized.csv', sep=',')
 df = getDate(scene_index)
 XMat = df.iloc[:, 3:14]
+print("Begin!")
 
 #ISOMAP
 D = isomap(XMat, n_components=2, n_neighbors=5)
 result = (D - np.min(D, axis=0)) / (np.max(D, axis=0) - np.min(D, axis=0))
 res_df = pd.DataFrame(data=result[0:, 0:], columns=['projection_x_ISOMAP', 'projection_y_ISOMAP'])
 df = df.join(res_df, how='outer')
+print("ISOMAP DONE!")
 
 # KPCA
 kpca = KernelPCA(n_components=2, kernel='precomputed')
@@ -198,12 +209,14 @@ X_kpca = kpca.fit_transform(K)
 result = (X_kpca - np.min(X_kpca, axis=0)) / (np.max(X_kpca, axis=0) - np.min(X_kpca, axis=0))
 res_df = pd.DataFrame(data=result[0:, 0:], columns=['projection_x_KPCA', 'projection_y_KPCA'])
 df = df.join(res_df, how='outer')
+print("KPCA DONE!")
 
 #MDS
 D = mds(XMat, n_components=2)
 result = (D - np.min(D, axis=0)) / (np.max(D, axis=0) - np.min(D, axis=0))
 res_df = pd.DataFrame(data=result[0:, 0:], columns=['projection_x_MDS', 'projection_y_MDS'])
 df = df.join(res_df, how='outer')
+print("MDS DONE!")
 
 #PCA
 pca = PCA(n_components=2)
@@ -212,6 +225,7 @@ res = pca.transform(XMat)
 result = (res - np.min(res, axis=0)) / (np.max(res, axis=0) - np.min(res, axis=0))
 res_df = pd.DataFrame(data=result[0:, 0:], columns=['projection_x_PCA', 'projection_y_PCA'])
 df = df.join(res_df, how='outer')
+print("PCA DONE!")
 
 #TSNE
 # 创建t-SNE模型，将数据降到二维
@@ -220,12 +234,21 @@ data_tsne = tsne.fit_transform(XMat.values)
 result = (data_tsne - np.min(data_tsne, axis=0)) / (np.max(data_tsne, axis=0) - np.min(data_tsne, axis=0))
 res_df = pd.DataFrame(data=result[0:, 0:], columns=['projection_x_TSNE', 'projection_y_TSNE'])
 df = df.join(res_df, how='outer')
+print("TSNE DONE!")
 
 #UMAP
 D=umap_reduction(XMat.to_numpy())
 result = (D - np.min(D, axis=0)) / (np.max(D, axis=0) - np.min(D, axis=0))
 res_df = pd.DataFrame(data=result[0:, 0:], columns=['projection_x_UMAP', 'projection_y_UMAP'])
 df = df.join(res_df, how='outer')
+print("UMAP DONE!")
+
+#LDA
+L=lda(XMat.to_numpy(),df["batch"])
+result = (L - np.min(L, axis=0)) / (np.max(L, axis=0) - np.min(L, axis=0))
+res_df = pd.DataFrame(data=result[0:, 0:], columns=['projection_x_LDA', 'projection_y_LDA'])
+df = df.join(res_df, how='outer')
+print("LDA DONE!")
 
 saveDate(df,scene_index)
 # df.to_csv(f'../data/data_{scene_index}/场景-{scene_index}-projection-isomap.csv', sep=',', index=False, header=True)
