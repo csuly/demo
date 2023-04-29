@@ -70,30 +70,23 @@ public class PointsController {
         }catch(Exception e) {return SearchPointsResult.error();}
     }
 
-    @PostMapping("/getPoint")
-    public SearchPointsResult mixPoints(@RequestBody JSONObject obj)
-    {
+    @PostMapping("/getTrackPoints")
+    public SearchPointsResult trackPoints(@RequestBody JSONObject obj) {
         int source = obj.getInteger("sourceSize");
         String scene="";
         try{
-            switch(source)
-            {
+            switch(source) {
                 case 2:scene="3223";break;
                 case 3:scene="2802";break;
                 case 5:scene="1054";break;
                 default:break;
             }
-            if(scene.isEmpty())
-            {
-                System.out.println("参数传递异常");
-                return SearchPointsResult.error();
-            }
-            else
-            {
+            if(scene.isEmpty()) {System.out.println("参数传递异常");return SearchPointsResult.error();}
+            else {
                 String pointName = "`" + scene + "-points`";
                 String featureName = "`" + scene + "-features`";
-                String sql = String.format("SELECT p.id, p.batch, p.source, p.lon, p.lat, (f.max_lon - f.min_lon) AS lon_len,"+
-                        " (f.max_lat - f.min_lat) AS lon_lat, f.avg_vel, f.sparsity, f.duration, f.avg_accel, f.avg_anguvel, f.avg_cou"+
+                String sql = String.format("SELECT p.id, p.batch, p.source, p.lon, p.lat,(f.max_lat - f.min_lat) AS lon_lat,"+
+                        " (f.max_lon - f.min_lon) AS lon_len, f.duration, f.avg_accel, f.avg_anguvel, f.avg_cou, f.avg_vel, f.sparsity"+
                         " FROM "+pointName+" AS p JOIN "+featureName+" AS f ON p.batch = f.batch AND p.source = f.source");
                 System.out.println(sql);
                 List<Map<String, Object>> data = jdbcTemplate.queryForList(sql);
