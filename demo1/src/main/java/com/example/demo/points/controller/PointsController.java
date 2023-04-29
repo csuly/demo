@@ -3,8 +3,6 @@ package com.example.demo.points.controller;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.example.demo.Result;
-import com.example.demo.features.entity.Features;
-import com.example.demo.features.reposity.*;
 import com.example.demo.points.entity.Points;
 import com.example.demo.points.entity.Points1054;
 import com.example.demo.points.entity.VO.PointsVO;
@@ -21,8 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import com.example.demo.points.repository.Points2802Repository;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -40,37 +36,10 @@ public class PointsController {
 //        this.points2802Repository = points2802Repository;
 //        this.points3223Repository = points3223Repository;
 //    }
-private Features2802Repository features2802Repository;
-    private Features3223Repository features3223Repository;
-    private Features1054Repository features1054Repository;
-    private FN1054Repository fn1054Repository;
-    private FN2802Repository fn2802Repository;
-    private FN3223Repository fn3223Repository;
-    private final Map<Integer, FeaturesRepository> repositoryMap = new HashMap<>();
-    private final Map<Integer, FNRepository> fnRepositoryMap = new HashMap<>();
-
-    public PointsController(Features1054Repository features1054Repository,
-                              Features2802Repository features2802Repository,
-                              Features3223Repository features3223Repository,
-                              FN3223Repository fn3223Repository,
-                              FN1054Repository fn1054Repository,
-                              FN2802Repository fn2802Repository,
-                              PointsService pointsService) {
-        this.features1054Repository = features1054Repository;
-        this.features2802Repository = features2802Repository;
-        this.features3223Repository = features3223Repository;
-        this.fn2802Repository = fn2802Repository;
-        this.fn3223Repository = fn3223Repository;
-        this.fn1054Repository = fn1054Repository;
-        repositoryMap.put(2, features3223Repository);
-        repositoryMap.put(3,features2802Repository);
-        repositoryMap.put(5,features1054Repository);
-        fnRepositoryMap.put(2,fn3223Repository);
-        fnRepositoryMap.put(3, fn2802Repository);
-        fnRepositoryMap.put(5, fn1054Repository);
+    public PointsController(PointsService pointsService)
+    {
         this.pointsService = pointsService;
     }
-
 
     /*
     @GetMapping("/getPoints")
@@ -98,6 +67,38 @@ private Features2802Repository features2802Repository;
             String sql = String.format("SELECT * FROM "+tableName+" WHERE source="+source);
             List<Map<String, Object>> data=jdbcTemplate.queryForList(sql);
             return SearchPointsResult.success(data);
+        }catch(Exception e) {return SearchPointsResult.error();}
+    }
+
+    @PostMapping("/getPoint")
+    public SearchPointsResult mixPoints(@RequestBody JSONObject obj)
+    {
+        int source = obj.getInteger("sourceSize");
+        String scene="";
+        try{
+            switch(source)
+            {
+                case 2:scene="3223";break;
+                case 3:scene="2802";break;
+                case 5:scene="1054";break;
+                default:break;
+            }
+            if(scene.isEmpty())
+            {
+                System.out.println("参数传递异常");
+                return SearchPointsResult.error();
+            }
+            else
+            {
+                String pointName = "`" + scene + "-points`";
+                String featureName = "`" + scene + "-features`";
+                String sql = String.format("SELECT p.id, p.batch, p.source, p.lon, p.lat, (f.max_lon - f.min_lon) AS lon_len,"+
+                        " (f.max_lat - f.min_lat) AS lon_lat, f.avg_vel, f.sparsity, f.duration, f.avg_accel, f.avg_anguvel, f.avg_cou"+
+                        " FROM "+pointName+" AS p JOIN "+featureName+" AS f ON p.batch = f.batch AND p.source = f.source");
+                System.out.println(sql);
+                List<Map<String, Object>> data = jdbcTemplate.queryForList(sql);
+                return SearchPointsResult.success(data);
+            }
         }catch(Exception e) {return SearchPointsResult.error();}
     }
 
@@ -190,39 +191,11 @@ private Features2802Repository features2802Repository;
     @PostMapping("/getPoints")
     public Result show(@RequestBody PointsQuery queryRequest)
     {
-        FeaturesRepository f = repositoryMap.get(queryRequest.getSourceSize());
-        List<Points> data = pointsService.findAll(queryRequest.getSourceSize());
-        List<PointsVO> res = new ArrayList<>();
-        int batch = data.get(0).getBatch(),source = data.get(0).getSource();
-        Features f1 = f.findByBatchAndSource(batch,source);
-        double lat_len = f1.getMax_lat() - f1.getMin_lat();
-        double lon_len = f1.getMax_lon() - f1.getMin_lon();
-        double b = f1.getAvg_accel(),c=f1.getAvg_anguvel(),a=f1.getDuration(),e=f1.getSparsity(),d = f1.getAvg_cou();
-        for(Points p : data)
-        {
-           if(p.getBatch() != batch && p.getSource() != source)
-           {
-               batch = p.getBatch();
-               source=p.getSource();
-               f1 = f.findByBatchAndSource(batch,source);
-               if(f1 == null)
-                   continue;
-               lat_len = f1.getMax_lat() - f1.getMin_lat();
-               lon_len = f1.getMax_lon() - f1.getMin_lon();
-               b = f1.getAvg_accel();
-               c = f1.getAvg_anguvel();
-               a = f1.getDuration();
-               e = f1.getSparsity();
-               d = f1.getAvg_cou();
-           }
-
-
-            res.add(new PointsVO(p.getId(),p.getBatch(),p.getSource(),p.getLat(),p.getLon(),lat_len,lon_len,a,b,c,d,e));
-        }
-//                .stream()
-//                .map((p) -> new PointsVO(p.getBatch(), p.getSource(), p.getLat(), p.getLon(),f.findByBatchAndSource(p.getBatch(),p.getSource())))
-//                .toList();
-        return Result.success(res);
+        List<PointsVO> data = pointsService.findAll(queryRequest.getSourceSize())
+                .stream()
+                .map((p) -> new PointsVO(p.getBatch(), p.getSource(), p.getLat(), p.getLon(),p.getTime(),p.getVel(),p.getCou(), false))
+                .toList();
+        return Result.success(data);
     }
 
 }
