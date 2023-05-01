@@ -199,7 +199,7 @@ public class FeaturesController {
         }
     }
 
-    @PostMapping("/getFeatureNormalizedData")
+    @PostMapping("/getFnData")
     public Result GetFnData(@RequestBody Request request)
     {
         List<Features> data = new ArrayList<>();
@@ -223,11 +223,45 @@ public class FeaturesController {
         return Result.success(data);
     }
 
+    @GetMapping("/getNewProjection")
+    public GetFeaturesResult getNewProjection(@RequestBody JSONObject obj)
+    {
+        try
+        {
+            int scene=obj.getInteger("scene");
+            String alg=obj.getString("pro_algo");
+            JSONArray fList=obj.getJSONArray("features");
+            if (scene==2802 || scene==3223 || scene==1054)
+            {
+                String tableName = "`"+scene+"-features-projection`";
+                String target="SELECT "+fList.getString(0);
+                for(int i=1;i<fList.size();i++) {
+                    target=target+", "+fList.getString(i);
+                }
+                target=target+" projection_x_"+alg+", "+" projection_y_"+alg+" FROM "+tableName;
+                String sql= String.format(target);
+                System.out.println(sql);
+                List<Map<String, Object>> data=jdbcTemplate.queryForList(sql);
+                return GetFeaturesResult.success(data);
+            }
+            else    //目标表不存在
+            {
+                System.out.println("目标表不存在");
+                return GetFeaturesResult.error();
+            }
+        }
+        catch (Exception e)
+        {
+            System.out.println("系统异常");
+            return GetFeaturesResult.error();
+        }
+    }
+
     //调用python文件函数
     public void runPython(String table) throws IOException, InterruptedException {
         //指定路径
         //arguement的第一个参数是anaconda环境的python地址，第二个参数是python文件的位置
-        String [] argument=new String[]{"D:\\Anaconda3\\envs\\pytorch\\python","E:\\360\\demo1\\src\\main\\resources\\touyin.py",table};
+        String [] argument=new String[]{"python","/root/python/touyin.py",table};
         try
         {
             //运行python文件
@@ -247,8 +281,8 @@ public class FeaturesController {
     }
 
     public boolean featuresNormalized() throws Exception {
-        String scriptPath = "E:\\360\\demo1\\src\\main\\resources\\feature_normalized.py";
-        String [] argument=new String[]{"D:\\Anaconda3\\envs\\pytorch\\python",scriptPath};
+        String scriptPath = "/root/python/feature_normalized.py";
+        String [] argument=new String[]{"python",scriptPath};
         try
         {
             //运行python文件
@@ -261,7 +295,7 @@ public class FeaturesController {
     }
 
     public boolean initFeature(String table) throws Exception {
-        String scriptPath = "E:\\360\\demo1\\src\\main\\resources\\feature_model.py";
+        String scriptPath = "/root/python/feature_model.py";
         String [] argument=new String[]{"python",scriptPath,table};
         try
         {
