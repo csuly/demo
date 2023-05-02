@@ -4,6 +4,7 @@ public record PointsVO(
         int id,
         int batch,
         int source,
+        double time,
         double lat,
         double lon,
         double lat_len,

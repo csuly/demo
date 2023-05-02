@@ -567,77 +567,81 @@ def scene_1054():
 
 
 def getDate(target_scene):
-  # 建立数据库连接
-  mydb = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="Fys8211200417",
-    auth_plugin="mysql_native_password",
-    database="shitai_db"
-  )
+    # 建立数据库连接
+    mydb = mysql.connector.connect(
+        host="gz-cynosdbmysql-grp-5dm79phb.sql.tencentcdb.com",
+        port=27114,
+        user="ghostlee",
+        password="Ly200210",
+        auth_plugin="mysql_native_password",
+        database="data"
+    )
 
-  # 创建游标对象
-  mycursor = mydb.cursor()
+    # 创建游标对象
+    mycursor = mydb.cursor()
 
-  # 执行SQL查询
-  mycursor.execute(
-    "SELECT id,batch,source,time,lon,lat,vel,cou"
-    +" FROM `"+str(target_scene)+"-points`")
+    # 执行SQL查询
+    mycursor.execute(
+        "SELECT id,batch,source,time,lon,lat,vel,cou"
+        + " FROM `" + str(target_scene) + "-points`")
 
-  # 获取查询结果
-  myresult = mycursor.fetchall()
-  result=pd.DataFrame(list(myresult))
-  result.columns=['id','batch','source','time','lon','lat','vel','cou']
-  # 打印查询结果
-  print(result)
-  mycursor.close()
-  mydb.close()
-  return result
+    # 获取查询结果
+    myresult = mycursor.fetchall()
+    result = pd.DataFrame(list(myresult))
+    result.columns = ['id', 'batch', 'source', 'time', 'lon', 'lat', 'vel', 'cou']
+    # 打印查询结果
+    print(result)
+    mycursor.close()
+    mydb.close()
+    return result
 
-#将数据存储到数据库
-def saveDate(info,target_scene):
- # 建立数据库连接
-  mydb = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="Fys8211200417",
-    auth_plugin="mysql_native_password",
-    database="shitai_db"
-  )
 
-  # 创建游标对象
-  mycursor = mydb.cursor()
-  
-  # 执行SQL查询
-  try:
-    i=0
-    for index, row in info.iterrows():
-      update="UPDATE `"+str(target_scene)+"-features` SET "+\
-            "time_min="+str(row['time_min'])+\
-            ", time_max="+str(row['time_max'])+\
-            ", duration="+str(row['duration'])+\
-            ", min_lon="+str(row['min_lon'])+\
-            ", max_lon="+str(row['max_lon'])+\
-            ", min_lat="+str(row['min_lat'])+\
-            ", max_lat="+str(row['max_lat'])+\
-            ", avg_vel="+str(row['avg_vel'])+\
-            ", avg_accel="+str(row['avg_accel'])+\
-            ", avg_cou="+str(row['avg_cou'])+\
-            ", avg_anguvel="+str(row['avg_anguvel'])+\
-            ", points="+str(row['points'])+\
-            ", sparsity="+str(row['sparsity'])+\
-            " WHERE source="+str(row['source'])+\
-            " AND batch="+str(row['batch'])
-      mycursor.execute(update)
-      mydb.commit()
-      if index%10==0 and index!=0:
-        print("finish "+str(index))
-    print("Done!")
-  except:
-    print("Error!")
-  mydb.rollback()
-  mycursor.close()
-  mydb.close()
+# 将数据存储到数据库
+def saveDate(info, target_scene):
+    # 建立数据库连接
+    mydb = mysql.connector.connect(
+        host="gz-cynosdbmysql-grp-5dm79phb.sql.tencentcdb.com",
+        port=27114,
+        user="ghostlee",
+        password="Ly200210",
+        auth_plugin="mysql_native_password",
+        database="data"
+    )
+
+    # 创建游标对象
+    mycursor = mydb.cursor()
+
+    # 执行SQL查询
+    try:
+        i = 0
+        for index, row in info.iterrows():
+            update = "UPDATE `" + str(target_scene) + "-features` SET " + \
+                     "time_min=" + str(row['time_min']) + \
+                     ", time_max=" + str(row['time_max']) + \
+                     ", duration=" + str(row['duration']) + \
+                     ", min_lon=" + str(row['min_lon']) + \
+                     ", max_lon=" + str(row['max_lon']) + \
+                     ", min_lat=" + str(row['min_lat']) + \
+                     ", max_lat=" + str(row['max_lat']) + \
+                     ", avg_vel=" + str(row['avg_vel']) + \
+                     ", avg_accel=" + str(row['avg_accel']) + \
+                     ", avg_cou=" + str(row['avg_cou']) + \
+                     ", avg_anguvel=" + str(row['avg_anguvel']) + \
+                     ", points=" + str(row['points']) + \
+                     ", sparsity=" + str(row['sparsity']) + \
+                     " WHERE source=" + str(row['source']) + \
+                     " AND batch=" + str(row['batch'])
+            mycursor.execute(update)
+            mydb.commit()
+            if index % 10 == 0 and index != 0:
+                print("finish " + str(index))
+        print("Done!")
+    except:
+        print("Error!")
+    mydb.rollback()
+    mycursor.close()
+    mydb.close()
+
 
 """
 统计的特征值包括：
@@ -649,11 +653,11 @@ def saveDate(info,target_scene):
 """
 
 scene_index = int(sys.argv[1])  # 定义场景文件序号
-#scene_index=3223
+# scene_index=3223
 
 # 1.读取场景航迹数据
-#csv_df = read_file(f"../data/data_{scene_index}/场景-{scene_index}-points.csv")
-csv_df=getDate(scene_index)
+# csv_df = read_file(f"../data/data_{scene_index}/场景-{scene_index}-points.csv")
+csv_df = getDate(scene_index)
 print(csv_df)
 
 # 2.调用对应计算方法
@@ -666,5 +670,5 @@ elif scene_index == 2802:
 elif scene_index == 1054:
     df = scene_1054()
 
-saveDate(df,scene_index)
-#df.to_csv(f'../data/data_{scene_index}/场景-{scene_index}-features.csv', encoding='utf-8', index=False, header=True)
+saveDate(df, scene_index)
+# df.to_csv(f'../data/data_{scene_index}/场景-{scene_index}-features.csv', encoding='utf-8', index=False, header=True)

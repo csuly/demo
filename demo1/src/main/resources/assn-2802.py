@@ -8,11 +8,11 @@ import sys
 def getDate(source):
   # 建立数据库连接
   mydb = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="Fys8211200417",
-    auth_plugin="mysql_native_password",
-    database="shitai_db"
+      host="gz-cynosdbmysql-grp-5dm79phb.sql.tencentcdb.com:27114",
+      user="ghostlee",
+      password="Ly200210",
+      auth_plugin="mysql_native_password",
+      database="data"
   )
 
   # 创建游标对象

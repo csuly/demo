@@ -30,17 +30,17 @@ import java.util.Map;
 public class PointsController {
     @Resource
     private JdbcTemplate jdbcTemplate;
-//    private Points2802Repository points2802Repository;
+    //    private Points2802Repository points2802Repository;
 //    private Points3223Repository points3223Repository;
 //    private Points1054Repository points1054Repository;
     private final PointsService pointsService;
 
-//    public PointsController(Points2802Repository points2802Repository,Points1054Repository points1054Repository,Points3223Repository points3223Repository) {
+    //    public PointsController(Points2802Repository points2802Repository,Points1054Repository points1054Repository,Points3223Repository points3223Repository) {
 //        this.points1054Repository = points1054Repository;
 //        this.points2802Repository = points2802Repository;
 //        this.points3223Repository = points3223Repository;
 //    }
-private Features2802Repository features2802Repository;
+    private Features2802Repository features2802Repository;
     private Features3223Repository features3223Repository;
     private Features1054Repository features1054Repository;
     private FN1054Repository fn1054Repository;
@@ -50,12 +50,12 @@ private Features2802Repository features2802Repository;
     private final Map<Integer, FNRepository> fnRepositoryMap = new HashMap<>();
 
     public PointsController(Features1054Repository features1054Repository,
-                              Features2802Repository features2802Repository,
-                              Features3223Repository features3223Repository,
-                              FN3223Repository fn3223Repository,
-                              FN1054Repository fn1054Repository,
-                              FN2802Repository fn2802Repository,
-                              PointsService pointsService) {
+                            Features2802Repository features2802Repository,
+                            Features3223Repository features3223Repository,
+                            FN3223Repository fn3223Repository,
+                            FN1054Repository fn1054Repository,
+                            FN2802Repository fn2802Repository,
+                            PointsService pointsService) {
         this.features1054Repository = features1054Repository;
         this.features2802Repository = features2802Repository;
         this.features3223Repository = features3223Repository;
@@ -127,14 +127,14 @@ private Features2802Repository features2802Repository;
 //                return PointsResult.error("添加失败");
 //            }
             if(pointsService.update(sense,point))
-            return PointsResult.success("添加成功");
+                return PointsResult.success("添加成功");
             else  return PointsResult.error("添加失败");
         }catch(Exception e) {
             System.out.println(e);
             return PointsResult.error("添加失败");}
     }
 
-//    @PutMapping("/updatePoint")
+    //    @PutMapping("/updatePoint")
 //    public PointsResult putPoints(@RequestBody PointsQuery point)
 //    {
 //        try{
@@ -200,24 +200,25 @@ private Features2802Repository features2802Repository;
         double b = f1.getAvg_accel(),c=f1.getAvg_anguvel(),a=f1.getDuration(),e=f1.getSparsity(),d = f1.getAvg_cou();
         for(Points p : data)
         {
-           if(p.getBatch() != batch && p.getSource() != source)
-           {
-               batch = p.getBatch();
-               source=p.getSource();
-               f1 = f.findByBatchAndSource(batch,source);
-               if(f1 == null)
-                   continue;
-               lat_len = f1.getMax_lat() - f1.getMin_lat();
-               lon_len = f1.getMax_lon() - f1.getMin_lon();
-               b = f1.getAvg_accel();
-               c = f1.getAvg_anguvel();
-               a = f1.getDuration();
-               e = f1.getSparsity();
-               d = f1.getAvg_cou();
-           }
+            if(p.getBatch() != batch && p.getSource() != source)
+            {
+                batch = p.getBatch();
+                source=p.getSource();
+                f1 = f.findByBatchAndSource(batch,source);
+                if(f1 == null)
+                    continue;
+                lat_len = f1.getMax_lat() - f1.getMin_lat();
+                lon_len = f1.getMax_lon() - f1.getMin_lon();
+                b = f1.getAvg_accel();
+                c = f1.getAvg_anguvel();
+                a = f1.getDuration();
+                e = f1.getSparsity();
+                d = f1.getAvg_cou();
+
+            }
 
 
-            res.add(new PointsVO(p.getId(),p.getBatch(),p.getSource(),p.getLat(),p.getLon(),lat_len,lon_len,a,b,c,d,e));
+            res.add(new PointsVO(p.getId(),p.getBatch(),p.getSource(),p.getTime(),p.getLat(),p.getLon(),lat_len,lon_len,a,b,c,d,e));
         }
 //                .stream()
 //                .map((p) -> new PointsVO(p.getBatch(), p.getSource(), p.getLat(), p.getLon(),f.findByBatchAndSource(p.getBatch(),p.getSource())))
