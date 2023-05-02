@@ -42,19 +42,20 @@ public class AssnController {
     }
 
     @GetMapping("/getAssn")
-    public GerAssnlistResult getPoints(@RequestBody AssnQuery assn) throws IOException, InterruptedException
+    public GerAssnlistResult getPoints(@RequestParam("scene") int scene,@RequestParam("weights") String weights) throws IOException, InterruptedException
     {
         JSONArray data=new JSONArray();
-        int length=assn.getWeights().size();
+        JSONObject item=JSONObject.parseObject(weights);
+        int length=item.size();
         try
         {
             if(length!=0)
             {
-                switch(assn.getScene())
+                switch(scene)
                 {
-                    case 3223:data=this.runPython("3223",assn.getWeights());break;
-                    case 2802:data=this.runPython("2802",assn.getWeights());break;
-                    case 1054:data=this.runPython("1054",assn.getWeights());break;
+                    case 3223:data=this.runPython("3223",item);break;
+                    case 2802:data=this.runPython("2802",item);break;
+                    case 1054:data=this.runPython("1054",item);break;
                     default: return GerAssnlistResult.error();
                 }
                 System.out.println(data);
@@ -62,7 +63,7 @@ public class AssnController {
             }
             else
             {
-                String tableName = "`"+assn.getScene()+"-features-normalized`";
+                String tableName = "`"+scene+"-features-normalized`";
                 String sql = String.format("SELECT * FROM "+tableName);
                 System.out.println(sql);
                 List<Map<String, Object>> result=jdbcTemplate.queryForList(sql);
@@ -587,8 +588,8 @@ public class AssnController {
 
     public JSONArray runPython(String table, JSONObject weights) throws IOException, InterruptedException {
         String scriptPath = "/root/python/4/assn-"+table+".py";
-        JSONArray result=new JSONArray();
         String [] argument=new String[]{"python",scriptPath,weights.getString("time_min"),weights.getString("time_max"),weights.getString("duration"),weights.getString("min_lon"),weights.getString("max_lon"),weights.getString("min_lat"),weights.getString("max_lat"),weights.getString("avg_vel"),weights.getString("avg_accel"),weights.getString("avg_cou"),weights.getString("avg_anguvel")};
+        JSONArray result=new JSONArray();
         try
         {
             //运行python文件

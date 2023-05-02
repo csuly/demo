@@ -21,10 +21,8 @@ import org.springframework.web.bind.annotation.*;
 import com.example.demo.points.repository.Points2802Repository;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.Array;
+import java.util.*;
 
 @RestController
 public class PointsController {
@@ -89,10 +87,8 @@ public class PointsController {
     */
 
     @GetMapping("/getPoints")
-    public SearchPointsResult searchPoints(@RequestBody JSONObject obj)
+    public SearchPointsResult searchPoints(@RequestParam("scene") int scene,@RequestParam("source") int source)
     {
-        int scene = obj.getInteger("scene");
-        int source = obj.getInteger("source");
         try{
             String tableName = "`"+scene+"-points`";
             String sql = String.format("SELECT * FROM "+tableName+" WHERE source="+source);
@@ -173,15 +169,14 @@ public class PointsController {
     }
 
     @DeleteMapping("/deletePoints")
-    public PointsResult deletePoints(@RequestBody JSONObject obj)
+    public PointsResult deletePoints(@RequestParam("scene") int scene,@RequestParam("id") String id)
     {
-        int scene = obj.getInteger("scene");
-        JSONArray idList = obj.getJSONArray("id");
         try{
             String tableName = "`"+scene+"-points`";
+            List<String>idList= Arrays.asList(id.split(","));
             for (int i=0;i<idList.size();i++)
             {
-                String sql = String.format("DELETE FROM " + tableName + " WHERE id=" + idList.getInteger(i));
+                String sql = String.format("DELETE FROM " + tableName + " WHERE id=" + idList.get(i));
                 jdbcTemplate.update(sql);
             }
             return PointsResult.success("删除成功");
