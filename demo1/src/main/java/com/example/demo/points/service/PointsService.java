@@ -31,9 +31,9 @@ public class PointsService {
     public List<Points> findAll(int sourceSize){
         List<Points> ret = new ArrayList<>();
         switch (sourceSize) {
-            case 2 -> ret = points2Repository.findAll().stream().map((p) -> ((Points) p)).toList();
-            case 3 -> ret = points1Repository.findAll().stream().map((p) -> ((Points) p)).toList();
-            case 5 -> ret = points3Repository.findAll().stream().map((p) -> ((Points) p)).toList();
+            case 2 -> ret = points3Repository.findAll().stream().map((p) -> ((Points) p)).toList();
+            case 3 -> ret = points2Repository.findAll().stream().map((p) -> ((Points) p)).toList();
+            case 5 -> ret = points1Repository.findAll().stream().map((p) -> ((Points) p)).toList();
             default -> {
             }
         }
@@ -73,7 +73,7 @@ public class PointsService {
             case "2802" -> points2Repository.save(new Points2802(point));
             case "3223" -> points3Repository.save(new Points3223(point));
             default -> {
-                    return false;
+                return false;
             }
         }
         return true;
