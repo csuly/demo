@@ -17,10 +17,7 @@ import javax.annotation.Resource;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 public class FeaturesController {
@@ -57,11 +54,10 @@ public class FeaturesController {
 
     //获取场景特征数据接口
     @GetMapping("/getFeatures")
-    public GetFeaturesResult getPoints(@RequestBody JSONObject obj)
+    public GetFeaturesResult getPoints(@RequestParam("scene") int scene,@RequestParam("list") String list)
     {
         try{
-            int scene=obj.getInteger("scene");
-            JSONArray list = obj.getJSONArray("list");
+            List<String> tagList = Arrays.asList(list.split(","));
             if(initFeature(String.valueOf(scene)))
             {
                 System.out.println("初始化成功");
@@ -69,9 +65,9 @@ public class FeaturesController {
                 {
                     String tableName = "`"+scene+"-features`";
                     String temp="SELECT ";
-                    for(int i=0;i<list.size();i++)
+                    for(int i=0;i<tagList.size();i++)
                     {
-                        temp=temp+list.get(i)+',';
+                        temp=temp+tagList.get(i)+',';
                     }
                     temp=temp.substring(0,temp.length()-1);
                     String sql = String.format(temp+" FROM "+tableName);
@@ -99,15 +95,14 @@ public class FeaturesController {
     }
 
     @DeleteMapping("/deleteFeatures")
-    public PointsResult deletePoints(@RequestBody JSONObject obj)
+    public PointsResult deletePoints(@RequestParam("scene") int scene,@RequestParam("id") String id)
     {
-        int scene = obj.getInteger("scene");
-        JSONArray idList = obj.getJSONArray("id");
         try{
             String tableName = "`"+scene+"-features`";
+            List<String>idList=Arrays.asList(id.split(","));
             for (int i=0;i<idList.size();i++)
             {
-                String sql = String.format("DELETE FROM " + tableName + " WHERE id=" + idList.getInteger(i));
+                String sql = String.format("DELETE FROM " + tableName + " WHERE id=" + idList.get(i));
                 jdbcTemplate.update(sql);
             }
             return PointsResult.success("删除成功");
@@ -146,11 +141,10 @@ public class FeaturesController {
     }
 
     @GetMapping("/getFeaturesNormalized")
-    public GetFeaturesResult getFeaturesNormalized(@RequestBody JSONObject obj)
+    public GetFeaturesResult getFeaturesNormalized(@RequestParam("scene") int scene)
     {
         try
         {
-            int scene=obj.getInteger("scene");
             if (scene==2802 || scene==3223 || scene==1054)
             {
                 String tableName = "`"+scene+"-features-normalized`";
@@ -173,11 +167,10 @@ public class FeaturesController {
     }
 
     @GetMapping("/getProjection")
-    public GetFeaturesResult getProjection(@RequestBody JSONObject obj)
+    public GetFeaturesResult getProjection(@RequestParam("scene") int scene)
     {
         try
         {
-            int scene=obj.getInteger("scene");
             if (scene==2802 || scene==3223 || scene==1054)
             {
                 String tableName = "`"+scene+"-features-projection`";
@@ -260,7 +253,8 @@ public class FeaturesController {
         //指定路径
         //arguement的第一个参数是anaconda环境的python地址，第二个参数是python文件的位置
         System.out.println("开始！");
-        String [] argument=new String[]{"/home/ubuntu/anaconda3/envs/myenv/bin/python","/home/ubuntu/python/touyin.py",table};
+//        String [] argument=new String[]{"/home/ubuntu/anaconda3/envs/myenv/bin/python","/home/ubuntu/python/touyin.py",table};
+        String [] argument=new String[]{"D:\\Anaconda3\\envs\\pytorch\\python","E:\\GitHub\\demo\\demo\\demo1\\src\\main\\resources\\touyin.py",table};
         try
         {
             //运行python文件
@@ -280,8 +274,10 @@ public class FeaturesController {
     }
 
     public boolean featuresNormalized() throws Exception {
-        String scriptPath = "/home/ubuntu/python/feature_normalized.py";
-        String [] argument=new String[]{"/home/ubuntu/anaconda3/envs/myenv/bin/python",scriptPath};
+//        String scriptPath = "/home/ubuntu/python/feature_normalized.py";
+//        String [] argument=new String[]{"/home/ubuntu/anaconda3/envs/myenv/bin/python",scriptPath};
+        String scriptPath = "E:\\GitHub\\demo\\demo\\demo1\\src\\main\\resources\\feature_normalized.py";
+        String [] argument=new String[]{"D:\\Anaconda3\\envs\\pytorch\\python",scriptPath};
         try
         {
             //运行python文件
@@ -294,8 +290,10 @@ public class FeaturesController {
     }
 
     public boolean initFeature(String table) throws Exception {
-        String scriptPath = "/home/ubuntu/python/feature_model.py";
-        String [] argument=new String[]{"python",scriptPath,table};
+        //String scriptPath = "/home/ubuntu/python/feature_model.py";
+        //String [] argument=new String[]{"python",scriptPath,table};
+        String scriptPath = "E:\\GitHub\\demo\\demo\\demo1\\src\\main\\resources\\feature_model.py";
+        String [] argument=new String[]{"D:\\Anaconda3\\envs\\pytorch\\python",scriptPath,table};
         try
         {
             //运行python文件
