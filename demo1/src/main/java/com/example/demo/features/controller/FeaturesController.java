@@ -253,8 +253,10 @@ public class FeaturesController {
         //指定路径
         //arguement的第一个参数是anaconda环境的python地址，第二个参数是python文件的位置
         System.out.println("开始！");
-//        String [] argument=new String[]{"/home/ubuntu/anaconda3/envs/myenv/bin/python","/home/ubuntu/python/touyin.py",table};
-        String [] argument=new String[]{"D:\\Anaconda3\\envs\\pytorch\\python","E:\\GitHub\\demo\\demo\\demo1\\src\\main\\resources\\touyin.py",table};
+
+        String [] argument=new String[]{"/home/ubuntu/anaconda3/envs/myenv/bin/python","/home/ubuntu/python/touyin.py",table};
+
+        //String [] argument=new String[]{"D:\\Anaconda3\\envs\\pytorch\\python","E:\\GitHub\\demo\\demo\\demo1\\src\\main\\resources\\touyin.py",table};
         try
         {
             //运行python文件
@@ -274,10 +276,12 @@ public class FeaturesController {
     }
 
     public boolean featuresNormalized() throws Exception {
-//        String scriptPath = "/home/ubuntu/python/feature_normalized.py";
-//        String [] argument=new String[]{"/home/ubuntu/anaconda3/envs/myenv/bin/python",scriptPath};
-        String scriptPath = "E:\\GitHub\\demo\\demo\\demo1\\src\\main\\resources\\feature_normalized.py";
-        String [] argument=new String[]{"D:\\Anaconda3\\envs\\pytorch\\python",scriptPath};
+        String scriptPath = "/home/ubuntu/python/feature_normalized.py";
+        String [] argument=new String[]{"/home/ubuntu/anaconda3/envs/myenv/bin/python",scriptPath};
+
+//        String scriptPath = "E:\\GitHub\\demo\\demo\\demo1\\src\\main\\resources\\feature_normalized.py";
+//        String [] argument=new String[]{"D:\\Anaconda3\\envs\\pytorch\\python",scriptPath};
+
         try
         {
             //运行python文件
@@ -290,10 +294,12 @@ public class FeaturesController {
     }
 
     public boolean initFeature(String table) throws Exception {
-        //String scriptPath = "/home/ubuntu/python/feature_model.py";
-        //String [] argument=new String[]{"python",scriptPath,table};
-        String scriptPath = "E:\\GitHub\\demo\\demo\\demo1\\src\\main\\resources\\feature_model.py";
-        String [] argument=new String[]{"D:\\Anaconda3\\envs\\pytorch\\python",scriptPath,table};
+        String scriptPath = "/home/ubuntu/python/feature_model.py";
+        String [] argument=new String[]{"python",scriptPath,table};
+
+//        String scriptPath = "E:\\GitHub\\demo\\demo\\demo1\\src\\main\\resources\\feature_model.py";
+//        String [] argument=new String[]{"D:\\Anaconda3\\envs\\pytorch\\python",scriptPath,table};
+
         try
         {
             //运行python文件
