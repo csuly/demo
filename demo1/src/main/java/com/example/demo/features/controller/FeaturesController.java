@@ -222,7 +222,7 @@ public class FeaturesController {
             data.add(featuresRepository.findByBatchAndSource(q.batch(), q.source()));
         return Result.success(data);
     }
-    @GetMapping("/getNewProjection")
+    @PostMapping("/getNewProjection")
     public GetFeaturesResult getNewProjection(@RequestBody JSONObject obj)
     {
         try
