@@ -5,6 +5,8 @@ public record PointsVO(
         int batch,
         int source,
         double time,
+        double vel,
+        double cou,
         double lat,
         double lon,
         double lat_len,
@@ -13,7 +15,8 @@ public record PointsVO(
         double avg_accel,
         double avg_auguvel,
         double avg_cou,
-        double sparsity
+        double sparsity,
+        double avg_vel
 
 ) {
 }

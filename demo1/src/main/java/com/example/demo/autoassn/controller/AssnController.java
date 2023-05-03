@@ -45,17 +45,18 @@ public class AssnController {
     public GerAssnlistResult getPoints(@RequestParam("scene") int scene,@RequestParam("weights") String weights) throws IOException, InterruptedException
     {
         JSONArray data=new JSONArray();
-        JSONObject item=JSONObject.parseObject(weights);
-        int length=item.size();
+        List<String>weight=Arrays.asList(weights.split(","));
+        System.out.println(weight);
+        int length=weight.size();
         try
         {
             if(length!=0)
             {
                 switch(scene)
                 {
-                    case 3223:data=this.runPython("3223",item);break;
-                    case 2802:data=this.runPython("2802",item);break;
-                    case 1054:data=this.runPython("1054",item);break;
+                    case 3223:data=this.runPython("3223",weight);break;
+                    case 2802:data=this.runPython("2802",weight);break;
+                    case 1054:data=this.runPython("1054",weight);break;
                     default: return GerAssnlistResult.error();
                 }
                 System.out.println(data);
@@ -586,9 +587,11 @@ public class AssnController {
 
 
 
-    public JSONArray runPython(String table, JSONObject weights) throws IOException, InterruptedException {
+    public JSONArray runPython(String table, List<String> weights) throws IOException, InterruptedException {
         String scriptPath = "/root/python/4/assn-"+table+".py";
-        String [] argument=new String[]{"python",scriptPath,weights.getString("time_min"),weights.getString("time_max"),weights.getString("duration"),weights.getString("min_lon"),weights.getString("max_lon"),weights.getString("min_lat"),weights.getString("max_lat"),weights.getString("avg_vel"),weights.getString("avg_accel"),weights.getString("avg_cou"),weights.getString("avg_anguvel")};
+        //String scriptPath = "E:\\GitHub\\demo\\demo\\demo1\\src\\main\\resources\\assn-"+table+".py";
+        String [] argument=new String[]{"python",scriptPath,weights.get(0),weights.get(1),weights.get(2),weights.get(3),weights.get(4),weights.get(5),weights.get(6),weights.get(7),weights.get(8),weights.get(9),weights.get(10)};
+
         JSONArray result=new JSONArray();
         try
         {

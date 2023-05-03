@@ -192,15 +192,14 @@ public class PointsController {
         Features f1 = f.findByBatchAndSource(batch,source);
         double lat_len = f1.getMax_lat() - f1.getMin_lat();
         double lon_len = f1.getMax_lon() - f1.getMin_lon();
-        double b = f1.getAvg_accel(),c=f1.getAvg_anguvel(),a=f1.getDuration(),e=f1.getSparsity(),d = f1.getAvg_cou();
+        double b = f1.getAvg_accel(), c = f1.getAvg_anguvel(), a = f1.getDuration(), e = f1.getSparsity(), d = f1.getAvg_cou(), g = f1.getAvg_vel();
         for(Points p : data)
         {
-            if(p.getBatch() != batch && p.getSource() != source)
-            {
+            if (p.getBatch() != batch || p.getSource() != source) {
                 batch = p.getBatch();
-                source=p.getSource();
-                f1 = f.findByBatchAndSource(batch,source);
-                if(f1 == null)
+                source = p.getSource();
+                f1 = f.findByBatchAndSource(batch, source);
+                if (f1 == null)
                     continue;
                 lat_len = f1.getMax_lat() - f1.getMin_lat();
                 lon_len = f1.getMax_lon() - f1.getMin_lon();
@@ -209,11 +208,12 @@ public class PointsController {
                 a = f1.getDuration();
                 e = f1.getSparsity();
                 d = f1.getAvg_cou();
+                g = f1.getAvg_vel();
 
             }
 
 
-            res.add(new PointsVO(p.getId(),p.getBatch(),p.getSource(),p.getTime(),p.getLat(),p.getLon(),lat_len,lon_len,a,b,c,d,e));
+            res.add(new PointsVO(p.getId(), p.getBatch(), p.getSource(), p.getTime(), p.getVel(), p.getCou(), p.getLat(), p.getLon(), lat_len, lon_len, a, b, c, d, e, g));
         }
 //                .stream()
 //                .map((p) -> new PointsVO(p.getBatch(), p.getSource(), p.getLat(), p.getLon(),f.findByBatchAndSource(p.getBatch(),p.getSource())))
