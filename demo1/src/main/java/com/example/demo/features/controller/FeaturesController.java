@@ -230,7 +230,7 @@ public class FeaturesController {
                 for(int i=1;i<fList.size();i++) {
                     target=target+", "+fList.getString(i);
                 }
-                target=target+" projection_x_"+alg+", "+" projection_y_"+alg+" FROM "+tableName;
+                target = target + ", projection_x_" + alg + ", " + " projection_y_" + alg + " FROM " + tableName;
                 String sql= String.format(target);
                 System.out.println(sql);
                 List<Map<String, Object>> data=jdbcTemplate.queryForList(sql);
