@@ -588,8 +588,8 @@ public class AssnController {
 
 
     public JSONArray runPython(String table, List<String> weights) throws IOException, InterruptedException {
-        String scriptPath = "/root/python/4/assn-"+table+".py";
-        //String scriptPath = "E:\\GitHub\\demo\\demo\\demo1\\src\\main\\resources\\assn-"+table+".py";
+        //String scriptPath = "/root/python/4/assn-"+table+".py";
+        String scriptPath = "E:\\GitHub\\demo\\demo\\demo1\\src\\main\\resources\\assn-"+table+".py";
         String [] argument=new String[]{"python",scriptPath,weights.get(0),weights.get(1),weights.get(2),weights.get(3),weights.get(4),weights.get(5),weights.get(6),weights.get(7),weights.get(8),weights.get(9),weights.get(10)};
 
         JSONArray result=new JSONArray();

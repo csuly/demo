@@ -64,7 +64,7 @@ public class FeaturesController {
                 if (scene==2802 || scene==3223 || scene==1054)
                 {
                     String tableName = "`"+scene+"-features`";
-                    String temp="SELECT ";
+                    String temp="SELECT id,batch,source,";
                     for(int i=0;i<tagList.size();i++)
                     {
                         temp=temp+tagList.get(i)+',';
@@ -114,27 +114,30 @@ public class FeaturesController {
         }
     }
 
-    @GetMapping("/saveFeatures")
+    @PostMapping ("/saveFeatures")
     public PutFeaturesResult saveFeatures(@RequestBody JSONObject obj)
     {
+        int scene=obj.getInteger("scene");
         try
         {
             System.out.println("开始归一化,请等待");
             featuresNormalized();
             System.out.println("结束归一化");
-            System.out.println("1054开始计算投影,请等待");
-            runPython("1054");
-            System.out.println("1054结束计算投影");
-            System.out.println("2802开始计算投影,请等待");
-            runPython("2802");
-            System.out.println("2802结束计算投影");
-            System.out.println("3223开始计算投影,请等待");
-            runPython("3223");
-            System.out.println("3223结束计算投影");
+            switch(scene)
+            {
+                case 1054:runPython("1054");break;
+                case 2802:runPython("2802");break;
+                case 3223:runPython("3223");break;
+                default:
+                {
+                    System.out.println("表不存在");
+                    return PutFeaturesResult.error("计算失败");
+                }
+            }
         }
         catch (Exception e)
         {
-            System.out.println(e);
+            System.out.println("异常");
             return PutFeaturesResult.error("计算失败");
         }
         return PutFeaturesResult.success("计算完毕，保存成功");
@@ -222,15 +225,18 @@ public class FeaturesController {
         {
             int scene=obj.getInteger("scene");
             String alg=obj.getString("pro_algo");
-            JSONArray fList=obj.getJSONArray("features");
+            List<String> fList= (List<String>) obj.get("features");
+            if(fList.get(0).split(",").length<=2)
+            {
+                System.out.println("维数过低，无法投影");
+                return GetFeaturesResult.error();
+            }
             if (scene==2802 || scene==3223 || scene==1054)
             {
                 String tableName = "`"+scene+"-features-projection`";
-                String target="SELECT "+fList.getString(0);
-                for(int i=1;i<fList.size();i++) {
-                    target=target+", "+fList.getString(i);
-                }
-                target = target + ", projection_x_" + alg + ", " + " projection_y_" + alg + " FROM " + tableName;
+                String target=fList.get(0);
+                partProjection(scene,target);
+                target = "SELECT id,batch,source,time_min,time_max,duration,min_lon,max_lon,min_lat,max_lat,avg_vel,avg_accel,avg_cou,avg_anguvel,points,sparsity,projection_x_" + alg + ", " + " projection_y_" + alg + " FROM " + tableName;
                 String sql= String.format(target);
                 System.out.println(sql);
                 List<Map<String, Object>> data=jdbcTemplate.queryForList(sql);
@@ -257,6 +263,37 @@ public class FeaturesController {
         String [] argument=new String[]{"/home/ubuntu/anaconda3/envs/myenv/bin/python","/home/ubuntu/python/touyin.py",table};
 
         //String [] argument=new String[]{"D:\\Anaconda3\\envs\\pytorch\\python","E:\\GitHub\\demo\\demo\\demo1\\src\\main\\resources\\touyin.py",table};
+        try
+        {
+            //运行python文件
+            Process process=Runtime.getRuntime().exec(argument);
+            //获取python输出信息
+            BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream(),"utf-8"));
+            String line=null;
+            while((line=in.readLine())!=null)
+            {
+                System.out.println(line);
+            }
+            in.close();
+            //等待当前python程序执行完毕
+            System.out.println(process.waitFor());
+        }catch (IOException e){e.printStackTrace();}
+        catch (InterruptedException e){e.printStackTrace();}
+    }
+
+    public void partProjection(int table,String fList) throws IOException, InterruptedException {
+        //指定路径
+        //arguement的第一个参数是anaconda环境的python地址，第二个参数是python文件的位置
+        System.out.println("开始！");
+
+        String pythonPath="/home/ubuntu/anaconda3/envs/myenv/bin/python";
+        String filePath="/home/ubuntu/python/touyin.py";
+        String [] argument=new String[]{pythonPath,filePath,String.valueOf(table),fList};
+
+//        String pythonPath="D:\\Anaconda3\\envs\\pytorch\\python";
+//        String filePath="E:\\GitHub\\demo\\demo\\demo1\\src\\main\\resources\\partProjection.py";
+//        String [] argument=new String[]{pythonPath,filePath,String.valueOf(table),fList};
+        System.out.println(argument[1]+"\t"+argument[2]+"\t"+argument[3]);
         try
         {
             //运行python文件
