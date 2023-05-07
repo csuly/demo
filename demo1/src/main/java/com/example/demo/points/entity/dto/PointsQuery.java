@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class PointsQuery {
     private int id;
-    private String sense;
+    private int scene;
     private int batch;
     private int source;
     private double time;

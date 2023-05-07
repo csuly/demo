@@ -100,7 +100,7 @@ public class PointsController {
     @PostMapping("/addPoint")
     public PointsResult postPoints(@RequestBody PointsQuery point)
     {
-        String sense = point.getSense();
+        int sense = point.getScene();
         System.out.println(sense);
         try{
 //            if(point.getScene().equals("2802"))
@@ -158,7 +158,7 @@ public class PointsController {
 //    }
     @PutMapping("/updatePoint")
     public PointsResult putPoints(@RequestBody PointsQuery point){
-        String sense = point.getSense();
+        int sense = point.getScene();
         try {
 
             if(pointsService.update(sense,point))

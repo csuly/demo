@@ -65,13 +65,12 @@ public class PointsService {
         return ret;
     }
 
-    public Boolean update(String sense, PointsQuery point)
-    {
+    public Boolean update(int sense, PointsQuery point) {
         Points p = new Points3223(point);
-        switch(sense) {
-            case "1054" -> points1Repository.save(new Points1054(point));
-            case "2802" -> points2Repository.save(new Points2802(point));
-            case "3223" -> points3Repository.save(new Points3223(point));
+        switch (sense) {
+            case 1054 -> points1Repository.save(new Points1054(point));
+            case 2802 -> points2Repository.save(new Points2802(point));
+            case 3223 -> points3Repository.save(new Points3223(point));
             default -> {
                 return false;
             }
