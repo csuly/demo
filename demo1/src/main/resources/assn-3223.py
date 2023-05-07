@@ -3,10 +3,28 @@ import numpy as np
 import mysql.connector
 import sys
 
+# 各信源航迹批号统计
+def batch_count(source):
+    # 筛选出该批号下所有航迹数据点
+    source_data = csv_df.loc[csv_df['source'] == source]
+    # 统计得到该信源下所有批号的集合
+    source_batch = source_data['batch'].unique().tolist()  # 统计batch属性列中所有可能值，即batch集合
+    return source_batch
+
+# 创建信源字典
+def source_dic(source_batch, source, dic):
+    for i, b in enumerate(source_batch):
+        # 筛选出该批号下所有航迹数据点
+        track = csv_df.query(f'source=={source} & batch=={b}')
+        track = track.reset_index(drop=True)
+        # 向字典中存入一条信息
+        dic[b] = track
+
 def getDate(source):
   # 建立数据库连接
   mydb = mysql.connector.connect(
-      host="gz-cynosdbmysql-grp-5dm79phb.sql.tencentcdb.com:27114",
+      host="gz-cynosdbmysql-grp-5dm79phb.sql.tencentcdb.com",
+      port=27114,
       user="ghostlee",
       password="Ly200210",
       auth_plugin="mysql_native_password",
@@ -30,6 +48,32 @@ def getDate(source):
     'min_lon','max_lon','min_lat','max_lat','avg_vel',
     'avg_accel','avg_cou','avg_anguvel','points','sparsity',
   ]
+  # 打印查询结果
+  mycursor.close()
+  mydb.close()
+  return result
+
+def getPointDate():
+  # 建立数据库连接
+  mydb = mysql.connector.connect(
+      host="gz-cynosdbmysql-grp-5dm79phb.sql.tencentcdb.com",
+      port=27114,
+      user="ghostlee",
+      password="Ly200210",
+      auth_plugin="mysql_native_password",
+      database="data"
+  )
+
+  # 创建游标对象
+  mycursor = mydb.cursor()
+
+    # 执行SQL查询
+  mycursor.execute("SELECT batch,source,time,lat,lon,vel,cou FROM `3223-points`")
+
+  # 获取查询结果
+  myresult = mycursor.fetchall()
+  result=pd.DataFrame(list(myresult))
+  result.columns=['batch','source','time','lat','lon','vel','cou']
   # 打印查询结果
   mycursor.close()
   mydb.close()
@@ -136,8 +180,66 @@ if diff_9002 != []:
     df_piece = df_piece.where((df_piece.notna()), -1)
     #print(df_piece)
     assn_all = assn_all.append(df_piece, ignore_index=True)
+    #显示所有行
+# pd.set_option('display.max_rows', None)
+# for row in range(1,len(assn_all)):
+#     print(str(assn_all.iloc[row][0])+','+str(assn_all.iloc[row][1]))
 
-#显示所有行
+# 3.计算置信度
+csv_df = getPointDate()
+
+# 统计每个信源下批号集合
+source_9001_batch = batch_count(9001)
+source_9002_batch = batch_count(9002)
+
+# 将每个信源下的所有批号及其对应数据点集合存为一个字典
+dic_9001 = {}  # 创建一个空字典
+source_dic(source_9001_batch, 9001, dic_9001)
+
+dic_9002 = {}  # 创建一个空字典
+source_dic(source_9002_batch, 9002, dic_9002)
+
+assn_all['accuracy_origin'] = 1
+# print(assn_all)
+
+for index, row in assn_all.iterrows():
+    # 如果有任意一条是-1，则跳过
+    if row['9001'] == -1 or row['9002'] == -1:
+        continue
+
+    # 找到对应的两条航迹
+    b1 = dic_9001[row['9001']]
+    b2 = dic_9002[row['9002']]
+    # print(b1)
+    # print(b2)
+
+    # 计算对应两个航迹的起终点余弦相似度
+    # 经度余弦相似度
+    lon_1 = np.array([b1.iloc[0]['lon'], b1.iloc[-1]['lon']])
+    lon_2 = np.array([b2.iloc[0]['lon'], b2.iloc[-1]['lon']])
+
+    cos_sim_lon = lon_1.dot(lon_2) / (np.linalg.norm(lon_1) * np.linalg.norm(lon_2))
+    #print(cos_sim_lon)
+
+    # 纬度余弦相似度
+    lat_1 = np.array([b1.iloc[0]['lat'], b1.iloc[-1]['lat']])
+    lat_2 = np.array([b2.iloc[0]['lat'], b2.iloc[-1]['lat']])
+
+    cos_sim_lat = lat_1.dot(lat_2) / (np.linalg.norm(lat_1) * np.linalg.norm(lat_2))
+    #print(cos_sim_lat)
+
+    # 取均值，存入dataframe
+    cos_sim = (cos_sim_lon + cos_sim_lat) / 2
+    assn_all.loc[index, 'accuracy_origin'] = cos_sim
+
+# 对置信度进行归一化操作
+assn_all['accuracy'] = (assn_all['accuracy_origin'] - assn_all['accuracy_origin'].min()) / (
+        assn_all['accuracy_origin'].max() - assn_all['accuracy_origin'].min())
+assn_all = assn_all.drop('accuracy_origin', axis=1)
+
+# 将值为1的全部改为0
+assn_all.loc[assn_all[['9001', '9002']].eq(-1).any(axis=1), 'accuracy'] = 0
 pd.set_option('display.max_rows', None)
 for row in range(1,len(assn_all)):
-    print(str(assn_all.iloc[row][0])+','+str(assn_all.iloc[row][1]))
+    print(str(assn_all.iloc[row][0])+','+str(assn_all.iloc[row][1])+','+str(assn_all.iloc[row][2]))
+

@@ -114,27 +114,30 @@ public class FeaturesController {
         }
     }
 
-    @GetMapping("/saveFeatures")
+    @PostMapping ("/saveFeatures")
     public PutFeaturesResult saveFeatures(@RequestBody JSONObject obj)
     {
+        int scene=obj.getInteger("scene");
         try
         {
             System.out.println("开始归一化,请等待");
             featuresNormalized();
             System.out.println("结束归一化");
-            System.out.println("1054开始计算投影,请等待");
-            runPython("1054");
-            System.out.println("1054结束计算投影");
-            System.out.println("2802开始计算投影,请等待");
-            runPython("2802");
-            System.out.println("2802结束计算投影");
-            System.out.println("3223开始计算投影,请等待");
-            runPython("3223");
-            System.out.println("3223结束计算投影");
+            switch(scene)
+            {
+                case 1054:runPython("1054");break;
+                case 2802:runPython("2802");break;
+                case 3223:runPython("3223");break;
+                default:
+                {
+                    System.out.println("表不存在");
+                    return PutFeaturesResult.error("计算失败");
+                }
+            }
         }
         catch (Exception e)
         {
-            System.out.println(e);
+            System.out.println("异常");
             return PutFeaturesResult.error("计算失败");
         }
         return PutFeaturesResult.success("计算完毕，保存成功");
@@ -283,13 +286,13 @@ public class FeaturesController {
         //arguement的第一个参数是anaconda环境的python地址，第二个参数是python文件的位置
         System.out.println("开始！");
 
-//        String pythonPath="/home/ubuntu/anaconda3/envs/myenv/bin/python";
-//        String filePath="/home/ubuntu/python/touyin.py";
-//        String [] argument=new String[]{pythonPath,filePath,table};
-
-        String pythonPath="D:\\Anaconda3\\envs\\pytorch\\python";
-        String filePath="E:\\GitHub\\demo\\demo\\demo1\\src\\main\\resources\\partProjection.py";
+        String pythonPath="/home/ubuntu/anaconda3/envs/myenv/bin/python";
+        String filePath="/home/ubuntu/python/touyin.py";
         String [] argument=new String[]{pythonPath,filePath,String.valueOf(table),fList};
+
+//        String pythonPath="D:\\Anaconda3\\envs\\pytorch\\python";
+//        String filePath="E:\\GitHub\\demo\\demo\\demo1\\src\\main\\resources\\partProjection.py";
+//        String [] argument=new String[]{pythonPath,filePath,String.valueOf(table),fList};
         System.out.println(argument[1]+"\t"+argument[2]+"\t"+argument[3]);
         try
         {
