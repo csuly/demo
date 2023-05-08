@@ -17,11 +17,13 @@ import sys
 def createTable(target_scene):
     # 建立数据库连接
     mydb = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="Fys8211200417",
+        host="gz-cynosdbmysql-grp-5dm79phb.sql.tencentcdb.com",
+        port=27114,
+        user="ghostlee",
+        password="Ly200210",
         auth_plugin="mysql_native_password",
-        database="shitai_db")
+        database="data"
+    )
     # 创建游标对象
     mycursor = mydb.cursor()
     # 执行SQL查询
@@ -45,11 +47,12 @@ def createTable(target_scene):
 def getDate(target_scene):
     # 建立数据库连接
     mydb = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="Fys8211200417",
+        host="gz-cynosdbmysql-grp-5dm79phb.sql.tencentcdb.com",
+        port=27114,
+        user="ghostlee",
+        password="Ly200210",
         auth_plugin="mysql_native_password",
-        database="shitai_db"
+        database="data"
     )
 
     # 创建游标对象
@@ -74,11 +77,12 @@ def getDate(target_scene):
 def saveDate(info,target_scene):
     # 建立数据库连接
     mydb = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="Fys8211200417",
+        host="gz-cynosdbmysql-grp-5dm79phb.sql.tencentcdb.com",
+        port=27114,
+        user="ghostlee",
+        password="Ly200210",
         auth_plugin="mysql_native_password",
-        database="shitai_db"
+        database="data"
     )
 
     # 创建游标对象

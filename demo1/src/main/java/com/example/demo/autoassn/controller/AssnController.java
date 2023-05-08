@@ -589,18 +589,17 @@ public class AssnController {
 
     public JSONArray runPython(String table, List<String> weights) throws IOException, InterruptedException {
         //String scriptPath = "/root/python/4/assn-"+table+".py";
-        String scriptPath = "E:\\GitHub\\demo\\demo\\demo1\\src\\main\\resources\\assn-"+table+".py";
-        String [] argument=new String[]{"python",scriptPath,weights.get(0),weights.get(1),weights.get(2),weights.get(3),weights.get(4),weights.get(5),weights.get(6),weights.get(7),weights.get(8),weights.get(9),weights.get(10)};
+        String scriptPath = "/home/ubuntu/python/assn-" + table + ".py";
+        String[] argument = new String[]{"/home/ubuntu/anaconda3/envs/myenv/bin/python", scriptPath, weights.get(0), weights.get(1), weights.get(2), weights.get(3), weights.get(4), weights.get(5), weights.get(6), weights.get(7), weights.get(8), weights.get(9), weights.get(10)};
 
-        JSONArray result=new JSONArray();
-        try
-        {
+        JSONArray result = new JSONArray();
+        try {
             //运行python文件
-            Process process=Runtime.getRuntime().exec(argument);
+            Process process = Runtime.getRuntime().exec(argument);
             //获取python输出信息
-            BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream(),"utf-8"));
-            String line=null;
-            int i=1;
+            BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream(), "utf-8"));
+            String line = null;
+            int i = 1;
             while((line=in.readLine())!=null)
             {
                 String[] row =line.split(",");

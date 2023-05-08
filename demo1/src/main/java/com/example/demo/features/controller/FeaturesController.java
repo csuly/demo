@@ -223,20 +223,19 @@ public class FeaturesController {
     {
         try
         {
-            int scene=obj.getInteger("scene");
-            String alg=obj.getString("pro_algo");
-            List<String> fList= (List<String>) obj.get("features");
-            if(fList.get(0).split(",").length<=2)
-            {
+            int scene = obj.getInteger("scene");
+            String alg = obj.getString("pro_algo");
+            List<String> fList = (List<String>) obj.get("features");
+//            for(Object s : fList.toArray())
+//                System.out.println(s);
+            if (fList.toArray().length <= 2) {
                 System.out.println("维数过低，无法投影");
                 return GetFeaturesResult.error();
             }
-            if (scene==2802 || scene==3223 || scene==1054)
-            {
-                String tableName = "`"+scene+"-features-projection`";
-                String target=fList.get(0);
-                for(int i=1;i<fList.size();i++)
-                {
+            if (scene == 2802 || scene == 3223 || scene == 1054) {
+                String tableName = "`" + scene + "-features-projection`";
+                String target = fList.get(0);
+                for (int i = 1; i < fList.size(); i++) {
                     target=target+","+fList.get(i);
                 }
                 System.out.println(target);
@@ -291,9 +290,9 @@ public class FeaturesController {
         //arguement的第一个参数是anaconda环境的python地址，第二个参数是python文件的位置
         System.out.println("开始！");
 
-        String pythonPath="/home/ubuntu/anaconda3/envs/myenv/bin/python";
-        String filePath="/home/ubuntu/python/touyin.py";
-        String [] argument=new String[]{pythonPath,filePath,String.valueOf(table),fList};
+        String pythonPath = "/home/ubuntu/anaconda3/envs/myenv/bin/python";
+        String filePath = "/home/ubuntu/python/partProjection.py";
+        String[] argument = new String[]{pythonPath, filePath, String.valueOf(table), fList};
 
 //        String pythonPath="D:\\Anaconda3\\envs\\pytorch\\python";
 //        String filePath="E:\\GitHub\\demo\\demo\\demo1\\src\\main\\resources\\partProjection.py";
