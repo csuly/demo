@@ -235,6 +235,11 @@ public class FeaturesController {
             {
                 String tableName = "`"+scene+"-features-projection`";
                 String target=fList.get(0);
+                for(int i=1;i<fList.size();i++)
+                {
+                    target=target+","+fList.get(i);
+                }
+                System.out.println(target);
                 partProjection(scene,target);
                 target = "SELECT id,batch,source,time_min,time_max,duration,min_lon,max_lon,min_lat,max_lat,avg_vel,avg_accel,avg_cou,avg_anguvel,points,sparsity,projection_x_" + alg + ", " + " projection_y_" + alg + " FROM " + tableName;
                 String sql= String.format(target);
