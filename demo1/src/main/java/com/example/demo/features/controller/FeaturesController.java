@@ -221,30 +221,34 @@ public class FeaturesController {
     @PostMapping("/getNewProjection")
     public GetFeaturesResult getNewProjection(@RequestBody JSONObject obj)
     {
+        JSONArray result;
         try
         {
             int scene = obj.getInteger("scene");
             String alg = obj.getString("pro_algo");
-            List<String> fList = (List<String>) obj.get("features");
+            JSONArray fList=obj.getJSONArray("features");
 //            for(Object s : fList.toArray())
 //                System.out.println(s);
-            if (fList.toArray().length <= 2) {
+            System.out.println(fList.size());
+            if (fList.size() <= 2) {
                 System.out.println("维数过低，无法投影");
                 return GetFeaturesResult.error();
             }
             if (scene == 2802 || scene == 3223 || scene == 1054) {
                 String tableName = "`" + scene + "-features-projection`";
-                String target = fList.get(0);
+                String target = fList.getString(0);
                 for (int i = 1; i < fList.size(); i++) {
-                    target=target+","+fList.get(i);
+                    target=target+","+fList.getString(i);
                 }
+                //target=target.substring(1,target.length() - 1);
                 System.out.println(target);
-                partProjection(scene,target);
-                target = "SELECT id,batch,source,time_min,time_max,duration,min_lon,max_lon,min_lat,max_lat,avg_vel,avg_accel,avg_cou,avg_anguvel,points,sparsity,projection_x_" + alg + ", " + " projection_y_" + alg + " FROM " + tableName;
-                String sql= String.format(target);
-                System.out.println(sql);
-                List<Map<String, Object>> data=jdbcTemplate.queryForList(sql);
-                return GetFeaturesResult.success(data);
+                result=partProjection(scene,alg,target);
+                System.out.println(result);
+//                target = "SELECT id,batch,source,time_min,time_max,duration,min_lon,max_lon,min_lat,max_lat,avg_vel,avg_accel,avg_cou,avg_anguvel,points,sparsity,projection_x_" + alg + ", " + " projection_y_" + alg + " FROM " + tableName;
+//                String sql= String.format(target);
+//                System.out.println(sql);
+//                List<Map<String, Object>> data=jdbcTemplate.queryForList(sql);
+                return GetFeaturesResult.success(result);
             }
             else    //目标表不存在
             {
@@ -285,19 +289,20 @@ public class FeaturesController {
         catch (InterruptedException e){e.printStackTrace();}
     }
 
-    public void partProjection(int table,String fList) throws IOException, InterruptedException {
+    public JSONArray partProjection(int table,String alg,String fList) throws IOException, InterruptedException {
         //指定路径
         //arguement的第一个参数是anaconda环境的python地址，第二个参数是python文件的位置
         System.out.println("开始！");
 
         String pythonPath = "/home/ubuntu/anaconda3/envs/myenv/bin/python";
         String filePath = "/home/ubuntu/python/partProjection.py";
-        String[] argument = new String[]{pythonPath, filePath, String.valueOf(table), fList};
 
 //        String pythonPath="D:\\Anaconda3\\envs\\pytorch\\python";
 //        String filePath="E:\\GitHub\\demo\\demo\\demo1\\src\\main\\resources\\partProjection.py";
-//        String [] argument=new String[]{pythonPath,filePath,String.valueOf(table),fList};
-        System.out.println(argument[1]+"\t"+argument[2]+"\t"+argument[3]);
+
+        String[] argument = new String[]{pythonPath, filePath,String.valueOf(table),alg,fList};
+
+        JSONArray result = new JSONArray();
         try
         {
             //运行python文件
@@ -307,13 +312,34 @@ public class FeaturesController {
             String line=null;
             while((line=in.readLine())!=null)
             {
-                System.out.println(line);
+                String[] row =line.split(",");
+                JSONObject temp=new JSONObject(true);
+                temp.put("id",Integer.parseInt(row[0]));
+                temp.put("source",Integer.parseInt(row[1]));
+                temp.put("batch",Integer.parseInt(row[2]));
+                temp.put("time_min",Float.parseFloat(row[3]));
+                temp.put("time_max",Float.parseFloat(row[4]));
+                temp.put("duration",Float.parseFloat(row[5]));
+                temp.put("min_lon",Float.parseFloat(row[6]));
+                temp.put("max_lon",Float.parseFloat(row[7]));
+                temp.put("min_lat",Float.parseFloat(row[8]));
+                temp.put("max_lat",Float.parseFloat(row[9]));
+                temp.put("avg_vel",Float.parseFloat(row[10]));
+                temp.put("avg_accel",Float.parseFloat(row[11]));
+                temp.put("avg_cou",Float.parseFloat(row[12]));
+                temp.put("avg_anguvel",Float.parseFloat(row[13]));
+                temp.put("points",Float.parseFloat(row[14]));
+                temp.put("sparsity",Float.parseFloat(row[15]));
+                temp.put("projection_x_"+alg,Float.parseFloat(row[16]));
+                temp.put("projection_y_"+alg,Float.parseFloat(row[17]));
+                result.add(temp);
             }
             in.close();
             //等待当前python程序执行完毕
             System.out.println(process.waitFor());
         }catch (IOException e){e.printStackTrace();}
         catch (InterruptedException e){e.printStackTrace();}
+        return result;
     }
 
     public boolean featuresNormalized() throws Exception {

@@ -23,6 +23,11 @@ def createTable(target_scene):
         password="Ly200210",
         auth_plugin="mysql_native_password",
         database="data"
+        # host="127.0.0.1",
+        # port=3306,
+        # user="root",
+        # password="Fys8211200417",
+        # database="shitai_db"
     )
     # 创建游标对象
     mycursor = mydb.cursor()
@@ -53,6 +58,11 @@ def getDate(target_scene):
         password="Ly200210",
         auth_plugin="mysql_native_password",
         database="data"
+        # host="127.0.0.1",
+        # port=3306,
+        # user="root",
+        # password="Fys8211200417",
+        # database="shitai_db"
     )
 
     # 创建游标对象
@@ -83,6 +93,11 @@ def saveDate(info,target_scene):
         password="Ly200210",
         auth_plugin="mysql_native_password",
         database="data"
+        # host="127.0.0.1",
+        # port=3306,
+        # user="root",
+        # password="Fys8211200417",
+        # database="shitai_db"
     )
 
     # 创建游标对象
@@ -189,77 +204,123 @@ def lda(XMat,y):
     result = (X_lda - np.min(X_lda, axis=0)) / (np.max(X_lda, axis=0) - np.min(X_lda, axis=0))
     return result
 
+def partIsomap(XMat,df):
+   D = isomap(XMat, n_components=2, n_neighbors=5)
+   result = (D - np.min(D, axis=0)) / (np.max(D, axis=0) - np.min(D, axis=0))
+   res_df = pd.DataFrame(data=result[0:, 0:], columns=['projection_x_ISOMAP', 'projection_y_ISOMAP'])
+   df = df.join(res_df, how='outer')
+   #print("ISOMAP DONE!")
+   for row in range(0,len(df)):
+       print(str(int(df.iloc[row][0]))+','+str(int(df.iloc[row][1]))+','+str(int(df.iloc[row][2]))+','+str(df.iloc[row][3])+','+str(df.iloc[row][4])+','+str(df.iloc[row][5])+','+str(df.iloc[row][6])+','+str(df.iloc[row][7])+','+str(df.iloc[row][8])+','+str(df.iloc[row][9])+','+str(df.iloc[row][10])+','+str(df.iloc[row][11])+','+str(df.iloc[row][12])+','+str(df.iloc[row][13])+','+str(df.iloc[row][14])+','+str(df.iloc[row][15])+','+str(df.iloc[row][16])+','+str(df.iloc[row][17]))
+
+
+def partKPCA(XMat,df):
+    # KPCA
+    kpca = KernelPCA(n_components=2, kernel='precomputed')
+    # 计算核矩阵
+    K = rbf_kernel(XMat.values, XMat.values, gamma=5)
+    # 训练KPCA模型
+    X_kpca = kpca.fit_transform(K)
+    result = (X_kpca - np.min(X_kpca, axis=0)) / (np.max(X_kpca, axis=0) - np.min(X_kpca, axis=0))
+    res_df = pd.DataFrame(data=result[0:, 0:], columns=['projection_x_KPCA', 'projection_y_KPCA'])
+    df = df.join(res_df, how='outer')
+    #print("KPCA DONE!")
+    for row in range(0,len(df)):
+        print(str(int(df.iloc[row][0]))+','+str(int(df.iloc[row][1]))+','+str(int(df.iloc[row][2]))+','+str(df.iloc[row][3])+','+str(df.iloc[row][4])+','+str(df.iloc[row][5])+','+str(df.iloc[row][6])+','+str(df.iloc[row][7])+','+str(df.iloc[row][8])+','+str(df.iloc[row][9])+','+str(df.iloc[row][10])+','+str(df.iloc[row][11])+','+str(df.iloc[row][12])+','+str(df.iloc[row][13])+','+str(df.iloc[row][14])+','+str(df.iloc[row][15])+','+str(df.iloc[row][16])+','+str(df.iloc[row][17]))
+
+
+def partMDS(XMat,df):
+    #MDS
+    D = mds(XMat, n_components=2)
+    result = (D - np.min(D, axis=0)) / (np.max(D, axis=0) - np.min(D, axis=0))
+    res_df = pd.DataFrame(data=result[0:, 0:], columns=['projection_x_MDS', 'projection_y_MDS'])
+    df = df.join(res_df, how='outer')
+    #print("MDS DONE!")
+    for row in range(0,len(df)):
+        print(str(int(df.iloc[row][0]))+','+str(int(df.iloc[row][1]))+','+str(int(df.iloc[row][2]))+','+str(df.iloc[row][3])+','+str(df.iloc[row][4])+','+str(df.iloc[row][5])+','+str(df.iloc[row][6])+','+str(df.iloc[row][7])+','+str(df.iloc[row][8])+','+str(df.iloc[row][9])+','+str(df.iloc[row][10])+','+str(df.iloc[row][11])+','+str(df.iloc[row][12])+','+str(df.iloc[row][13])+','+str(df.iloc[row][14])+','+str(df.iloc[row][15])+','+str(df.iloc[row][16])+','+str(df.iloc[row][17]))
+
+
+def partPCA(XMat,df):
+    #PCA
+    pca = PCA(n_components=2)
+    pca.fit(XMat)
+    res = pca.transform(XMat)
+    result = (res - np.min(res, axis=0)) / (np.max(res, axis=0) - np.min(res, axis=0))
+    res_df = pd.DataFrame(data=result[0:, 0:], columns=['projection_x_PCA', 'projection_y_PCA'])
+    df = df.join(res_df, how='outer')
+    #print("PCA DONE!")
+    for row in range(0,len(df)):
+        print(str(int(df.iloc[row][0]))+','+str(int(df.iloc[row][1]))+','+str(int(df.iloc[row][2]))+','+str(df.iloc[row][3])+','+str(df.iloc[row][4])+','+str(df.iloc[row][5])+','+str(df.iloc[row][6])+','+str(df.iloc[row][7])+','+str(df.iloc[row][8])+','+str(df.iloc[row][9])+','+str(df.iloc[row][10])+','+str(df.iloc[row][11])+','+str(df.iloc[row][12])+','+str(df.iloc[row][13])+','+str(df.iloc[row][14])+','+str(df.iloc[row][15])+','+str(df.iloc[row][16])+','+str(df.iloc[row][17]))
+
+
+def partTSNE(XMat,df):
+    #TSNE
+    # 创建t-SNE模型，将数据降到二维
+    tsne = TSNE(n_components=2, random_state=15)
+    data_tsne = tsne.fit_transform(XMat.values)
+    result = (data_tsne - np.min(data_tsne, axis=0)) / (np.max(data_tsne, axis=0) - np.min(data_tsne, axis=0))
+    res_df = pd.DataFrame(data=result[0:, 0:], columns=['projection_x_TSNE', 'projection_y_TSNE'])
+    df = df.join(res_df, how='outer')
+    #print("TSNE DONE!")
+    for row in range(0,len(df)):
+        print(str(int(df.iloc[row][0]))+','+str(int(df.iloc[row][1]))+','+str(int(df.iloc[row][2]))+','+str(df.iloc[row][3])+','+str(df.iloc[row][4])+','+str(df.iloc[row][5])+','+str(df.iloc[row][6])+','+str(df.iloc[row][7])+','+str(df.iloc[row][8])+','+str(df.iloc[row][9])+','+str(df.iloc[row][10])+','+str(df.iloc[row][11])+','+str(df.iloc[row][12])+','+str(df.iloc[row][13])+','+str(df.iloc[row][14])+','+str(df.iloc[row][15])+','+str(df.iloc[row][16])+','+str(df.iloc[row][17]))
+
+
+def partUMAP(XMat,df):
+    #UMAP
+    D=umap_reduction(XMat.to_numpy())
+    result = (D - np.min(D, axis=0)) / (np.max(D, axis=0) - np.min(D, axis=0))
+    res_df = pd.DataFrame(data=result[0:, 0:], columns=['projection_x_UMAP', 'projection_y_UMAP'])
+    df = df.join(res_df, how='outer')
+    #print("UMAP DONE!")
+    for row in range(0,len(df)):
+        print(str(int(df.iloc[row][0]))+','+str(int(df.iloc[row][1]))+','+str(int(df.iloc[row][2]))+','+str(df.iloc[row][3])+','+str(df.iloc[row][4])+','+str(df.iloc[row][5])+','+str(df.iloc[row][6])+','+str(df.iloc[row][7])+','+str(df.iloc[row][8])+','+str(df.iloc[row][9])+','+str(df.iloc[row][10])+','+str(df.iloc[row][11])+','+str(df.iloc[row][12])+','+str(df.iloc[row][13])+','+str(df.iloc[row][14])+','+str(df.iloc[row][15])+','+str(df.iloc[row][16])+','+str(df.iloc[row][17]))
+
+
+def partLDA(XMat,df):
+    #LDA
+    L=lda(XMat.to_numpy(),df["batch"])
+    result = (L - np.min(L, axis=0)) / (np.max(L, axis=0) - np.min(L, axis=0))
+    res_df = pd.DataFrame(data=result[0:, 0:], columns=['projection_x_LDA', 'projection_y_LDA'])
+    df = df.join(res_df, how='outer')
+    #print("LDA DONE!")
+    pd.set_option('display.max_rows', None)
+    for row in range(0,len(df)):
+        print(str(int(df.iloc[row][0]))+','+str(int(df.iloc[row][1]))+','+str(int(df.iloc[row][2]))+','+str(df.iloc[row][3])+','+str(df.iloc[row][4])+','+str(df.iloc[row][5])+','+str(df.iloc[row][6])+','+str(df.iloc[row][7])+','+str(df.iloc[row][8])+','+str(df.iloc[row][9])+','+str(df.iloc[row][10])+','+str(df.iloc[row][11])+','+str(df.iloc[row][12])+','+str(df.iloc[row][13])+','+str(df.iloc[row][14])+','+str(df.iloc[row][15])+','+str(df.iloc[row][16])+','+str(df.iloc[row][17]))
+
+
 # 读取数据
 # scene_index = 3223
 scene_index = int(sys.argv[1])  # 定义场景文件序号
-fList = pd.read_csv(io.StringIO(sys.argv[2]), lineterminator=',',header=None)
-for item in fList:
-    print(fList)
-createTable(scene_index)
+model = sys.argv[2]
+fList = pd.read_csv(io.StringIO(sys.argv[3]), lineterminator=',',header=None)
+#for item in fList:
+#    print(fList)
 # X = pd.read_csv(f'../data/data_{scene_index}/场景-{scene_index}-features-normalized.csv', sep=',')
 df = getDate(scene_index)
 XMat = df.loc[:,fList[0]]
-print(XMat)
-print("Begin!")
+#print(XMat)
+#print("Begin!")
 
-#ISOMAP
-D = isomap(XMat, n_components=2, n_neighbors=5)
-result = (D - np.min(D, axis=0)) / (np.max(D, axis=0) - np.min(D, axis=0))
-res_df = pd.DataFrame(data=result[0:, 0:], columns=['projection_x_ISOMAP', 'projection_y_ISOMAP'])
-df = df.join(res_df, how='outer')
-print("ISOMAP DONE!")
+if model == "isomap":
+    partIsomap(XMat,df)
+elif model == "kpca":
+    partKPCA(XMat,df)
+elif model == "mds":
+    partMDS(XMat,df)
+elif model == "pca":
+    partPCA(XMat,df)
+elif model == "tsne":
+    partTSNE(XMat,df)
+elif model == "umap":
+    partLDA(XMat,df)
+elif model == "lda":
+    partLDA(XMat,df)
+else:
+    print("目标表输入错误")
 
-# KPCA
-kpca = KernelPCA(n_components=2, kernel='precomputed')
-# 计算核矩阵
-K = rbf_kernel(XMat.values, XMat.values, gamma=5)
-# 训练KPCA模型
-X_kpca = kpca.fit_transform(K)
-result = (X_kpca - np.min(X_kpca, axis=0)) / (np.max(X_kpca, axis=0) - np.min(X_kpca, axis=0))
-res_df = pd.DataFrame(data=result[0:, 0:], columns=['projection_x_KPCA', 'projection_y_KPCA'])
-df = df.join(res_df, how='outer')
-print("KPCA DONE!")
 
-#MDS
-D = mds(XMat, n_components=2)
-result = (D - np.min(D, axis=0)) / (np.max(D, axis=0) - np.min(D, axis=0))
-res_df = pd.DataFrame(data=result[0:, 0:], columns=['projection_x_MDS', 'projection_y_MDS'])
-df = df.join(res_df, how='outer')
-print("MDS DONE!")
-
-#PCA
-pca = PCA(n_components=2)
-pca.fit(XMat)
-res = pca.transform(XMat)
-result = (res - np.min(res, axis=0)) / (np.max(res, axis=0) - np.min(res, axis=0))
-res_df = pd.DataFrame(data=result[0:, 0:], columns=['projection_x_PCA', 'projection_y_PCA'])
-df = df.join(res_df, how='outer')
-print("PCA DONE!")
-
-#TSNE
-# 创建t-SNE模型，将数据降到二维
-tsne = TSNE(n_components=2, random_state=15)
-data_tsne = tsne.fit_transform(XMat.values)
-result = (data_tsne - np.min(data_tsne, axis=0)) / (np.max(data_tsne, axis=0) - np.min(data_tsne, axis=0))
-res_df = pd.DataFrame(data=result[0:, 0:], columns=['projection_x_TSNE', 'projection_y_TSNE'])
-df = df.join(res_df, how='outer')
-print("TSNE DONE!")
-
-#UMAP
-D=umap_reduction(XMat.to_numpy())
-result = (D - np.min(D, axis=0)) / (np.max(D, axis=0) - np.min(D, axis=0))
-res_df = pd.DataFrame(data=result[0:, 0:], columns=['projection_x_UMAP', 'projection_y_UMAP'])
-df = df.join(res_df, how='outer')
-print("UMAP DONE!")
-
-#LDA
-L=lda(XMat.to_numpy(),df["batch"])
-result = (L - np.min(L, axis=0)) / (np.max(L, axis=0) - np.min(L, axis=0))
-res_df = pd.DataFrame(data=result[0:, 0:], columns=['projection_x_LDA', 'projection_y_LDA'])
-df = df.join(res_df, how='outer')
-print("LDA DONE!")
-
-saveDate(df,scene_index)
+#saveDate(df,scene_index)
 
 
 #df.to_csv(f'../data/data_{scene_index}/场景-{scene_index}-projection-isomap.csv', sep=',', index=False, header=True)
