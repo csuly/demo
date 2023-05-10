@@ -13,7 +13,7 @@ public record PointsVO(
         double lon_len,
         double duration,
         double avg_accel,
-        double avg_auguvel,
+        double avg_anguvel,
         double avg_cou,
         double sparsity,
         double avg_vel

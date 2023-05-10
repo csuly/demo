@@ -29,15 +29,16 @@ public class Assn2802 {
     @Column(name = "`9003`")
     private int source3;
 
-    public void setS1andS2andS3(int s1,int s2,int s3)
-    {
+    @Column(name = "accuracy")
+    private double accuracy;
+
+    public void setS1andS2andS3(int s1, int s2, int s3) {
         source1 = s1;
         source2 = s2;
         source3 = s3;
     }
 
-    public Assn2802(Assn2802 assn1)
-    {
+    public Assn2802(Assn2802 assn1) {
         this.source1 = assn1.getSource1();
         this.source2 = assn1.getSource2();
         this.source3 = assn1.getSource3();

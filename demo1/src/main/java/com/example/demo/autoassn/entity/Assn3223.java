@@ -24,4 +24,7 @@ public class Assn3223 {
 
     @Column(name = "`9002`")
     private int source2;
+
+    @Column(name = "accuracy")
+    private double accuracy;
 }

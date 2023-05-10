@@ -34,15 +34,19 @@ public class Assn1054 {
     @Column(name = "`9005`")
     private int source5;
 
-    public Assn1054(Assn1054 a)
-    {
+    @Column(name = "accuracy")
+    private double accuracy;
+
+
+    public Assn1054(Assn1054 a) {
         this.source1 = a.getSource1();
         this.source2 = a.getSource2();
         this.source3 = a.getSource3();
         this.source4 = a.getSource4();
         this.source5 = a.getSource5();
     }
-    public void setAssn3(int a,int b,int c,int d, int e)
+
+    public void setAssn3(int a, int b, int c, int d, int e)
     {
         source1 = a;
         source2 = b;

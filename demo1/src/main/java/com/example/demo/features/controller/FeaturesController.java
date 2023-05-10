@@ -243,7 +243,7 @@ public class FeaturesController {
                 //target=target.substring(1,target.length() - 1);
                 System.out.println(target);
                 result=partProjection(scene,alg,target);
-                System.out.println(result);
+//                System.out.println(result);
 //                target = "SELECT id,batch,source,time_min,time_max,duration,min_lon,max_lon,min_lat,max_lat,avg_vel,avg_accel,avg_cou,avg_anguvel,points,sparsity,projection_x_" + alg + ", " + " projection_y_" + alg + " FROM " + tableName;
 //                String sql= String.format(target);
 //                System.out.println(sql);
