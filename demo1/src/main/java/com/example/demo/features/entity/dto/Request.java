@@ -12,6 +12,6 @@ import java.util.List;
 @Getter
 @Setter
 public class Request {
-    private int sourceSize;
+    private int scene;
     private List<QueryItem> sources;
 }

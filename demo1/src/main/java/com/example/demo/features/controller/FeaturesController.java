@@ -9,6 +9,8 @@ import com.example.demo.features.entity.dto.Request;
 import com.example.demo.features.reposity.*;
 import com.example.demo.features.result.GetFeaturesResult;
 import com.example.demo.features.result.PutFeaturesResult;
+import com.example.demo.features.service.FNService;
+import com.example.demo.features.service.FeaturesService;
 import com.example.demo.points.result.PointsResult;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -31,13 +33,17 @@ public class FeaturesController {
     private FN3223Repository fn3223Repository;
     private final Map<Integer, FeaturesRepository> repositoryMap = new HashMap<>();
     private final Map<Integer, FNRepository> fnRepositoryMap = new HashMap<>();
+    private final FNService fnService;
+    private final FeaturesService featuresService;
 
     public FeaturesController(Features1054Repository features1054Repository,
                               Features2802Repository features2802Repository,
                               Features3223Repository features3223Repository,
                               FN3223Repository fn3223Repository,
                               FN1054Repository fn1054Repository,
-                              FN2802Repository fn2802Repository) {
+                              FN2802Repository fn2802Repository,
+                              FNService fnService,
+                              FeaturesService featuresService) {
         this.features1054Repository = features1054Repository;
         this.features2802Repository = features2802Repository;
         this.features3223Repository = features3223Repository;
@@ -45,11 +51,13 @@ public class FeaturesController {
         this.fn3223Repository = fn3223Repository;
         this.fn1054Repository = fn1054Repository;
         repositoryMap.put(2, features3223Repository);
-        repositoryMap.put(3,features2802Repository);
-        repositoryMap.put(5,features1054Repository);
-        fnRepositoryMap.put(2,fn3223Repository);
+        repositoryMap.put(3, features2802Repository);
+        repositoryMap.put(5, features1054Repository);
+        fnRepositoryMap.put(2, fn3223Repository);
         fnRepositoryMap.put(3, fn2802Repository);
         fnRepositoryMap.put(5, fn1054Repository);
+        this.fnService = fnService;
+        this.featuresService = featuresService;
     }
 
     //获取场景特征数据接口
@@ -196,26 +204,18 @@ public class FeaturesController {
     }
 
     @PostMapping("/getFeatureNormalizedData")
-    public Result GetFnData(@RequestBody Request request)
-    {
-        List<Features> data = new ArrayList<>();
-        FNRepository fnRepository = fnRepositoryMap.get(request.getSourceSize());
-        if(fnRepository == null)
-            return Result.error("400","No such table");
-        for(QueryItem q : request.getSources())
-        {
-            data.add(fnRepository.findByBatchAndSource(q.batch(), q.source()));
-        }
+    public Result GetFnData(@RequestBody Request request) {
+        List<Features> data = fnService.getData(request.getScene(), request.getSources());
+        if (data == null)
+            return Result.error("400", "No such table");
         return Result.success(data);
     }
 
     @PostMapping("/searchFeatures")
-    public Result search(@RequestBody Request request)
-    {
-        List<Features> data = new ArrayList<>();
-        FeaturesRepository featuresRepository = repositoryMap.get(request.getSourceSize());
-        for(QueryItem q:request.getSources())
-            data.add(featuresRepository.findByBatchAndSource(q.batch(), q.source()));
+    public Result search(@RequestBody Request request) {
+        List<Features> data = featuresService.getData(request.getScene(), request.getSources());
+        if (data == null)
+            return Result.error("400", "No such table");
         return Result.success(data);
     }
     @PostMapping("/getNewProjection")

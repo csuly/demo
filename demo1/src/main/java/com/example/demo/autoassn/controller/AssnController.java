@@ -4,12 +4,8 @@ package com.example.demo.autoassn.controller;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.example.demo.Result;
-import com.example.demo.autoassn.entity.Assn1054;
-import com.example.demo.autoassn.entity.Assn2802;
-import com.example.demo.autoassn.entity.Assn3223;
-import com.example.demo.autoassn.repository.Assn1054Repository;
-import com.example.demo.autoassn.repository.Assn2802Repository;
-import com.example.demo.autoassn.repository.Assn3223Repository;
+import com.example.demo.autoassn.entity.*;
+import com.example.demo.autoassn.repository.*;
 import com.example.demo.autoassn.result.GerAssnlistResult;
 import com.example.demo.autoassn.entity.dto.AssnQuery;
 import org.apache.logging.log4j.util.PerformanceSensitive;
@@ -33,12 +29,22 @@ public class AssnController {
     private final Assn1054Repository assn1054Repository;
     private final Assn2802Repository assn2802Repository;
     private final Assn3223Repository assn3223Repository;
+    private final Assn0Repository assn0Repository;
+    private final Assn88Repository assn88Repository;
+    private final Assn2619Repository assn2619Repository;
 
-    public AssnController(Assn1054Repository assn1054Repository,Assn2802Repository assn2802Repository,Assn3223Repository assn3223Repository)
-    {
+    public AssnController(Assn1054Repository assn1054Repository,
+                          Assn2802Repository assn2802Repository,
+                          Assn3223Repository assn3223Repository,
+                          Assn0Repository assn0Repository,
+                          Assn88Repository assn88Repository,
+                          Assn2619Repository assn2619Repository) {
         this.assn1054Repository = assn1054Repository;
         this.assn2802Repository = assn2802Repository;
         this.assn3223Repository = assn3223Repository;
+        this.assn0Repository = assn0Repository;
+        this.assn88Repository = assn88Repository;
+        this.assn2619Repository = assn2619Repository;
     }
 
     @GetMapping("/getAssn")
@@ -132,21 +138,73 @@ public class AssnController {
         List<Assn3223> list = assn3223Repository.findAll();
         List<Integer> source1 = new ArrayList<>();
         List<Integer> source2 = new ArrayList<>();
-        for(Assn3223 a : list)
-        {
+        for(Assn3223 a : list) {
             source1.add(a.getSource1());
             source2.add(a.getSource2());
         }
         Map res = new HashMap<>();
-        res.put("all",list);
-        res.put("source1",source1);
-        res.put("source2",source2);
+        res.put("all", list);
+        res.put("source1", source1);
+        res.put("source2", source2);
+        return Result.success(res);
+    }
+
+
+    @GetMapping("/getAssn/assn0")
+    public Result get0() {
+
+        List<Assn0> list = assn0Repository.findAll();
+        List<Integer> source1 = new ArrayList<>();
+        List<Integer> source2 = new ArrayList<>();
+        for (Assn0 a : list) {
+            source1.add(a.getSource1());
+            source2.add(a.getSource2());
+        }
+        Map res = new HashMap<>();
+        res.put("all", list);
+        res.put("source1", source1);
+        res.put("source2", source2);
+        return Result.success(res);
+    }
+
+
+    @GetMapping("/getAssn/assn88")
+    public Result get88() {
+
+        List<Assn88> list = assn88Repository.findAll();
+        List<Integer> source1 = new ArrayList<>();
+        List<Integer> source2 = new ArrayList<>();
+        for (Assn88 a : list) {
+            source1.add(a.getSource1());
+            source2.add(a.getSource2());
+        }
+        Map res = new HashMap<>();
+        res.put("all", list);
+        res.put("source1", source1);
+        res.put("source2", source2);
+        return Result.success(res);
+    }
+
+
+    @GetMapping("/getAssn/assn2619")
+    public Result get2619() {
+
+        List<Assn2619> list = assn2619Repository.findAll();
+        List<Integer> source1 = new ArrayList<>();
+        List<Integer> source2 = new ArrayList<>();
+        for (Assn2619 a : list) {
+            source1.add(a.getSource1());
+            source2.add(a.getSource2());
+        }
+        Map res = new HashMap<>();
+        res.put("all", list);
+        res.put("source1", source1);
+        res.put("source2", source2);
         return Result.success(res);
     }
 
     @PostMapping("/addAssn/assn1054")
-    public Result add1054(@RequestBody Assn1054 assn3)
-    {
+    public Result add1054(@RequestBody Assn1054 assn3) {
         Assn1054 a = assn1054Repository.findBySource1AndSource2AndSource3AndSource4AndSource5(assn3.getSource1(),
                 assn3.getSource2(), assn3.getSource3(), assn3.getSource4(), assn3.getSource5());
         int s1 = assn3.getSource1();
@@ -287,18 +345,133 @@ public class AssnController {
         List<Assn3223> data = new ArrayList<>();
         data.add(a);
         List<Assn3223> assn2s = assn3223Repository.findAll();
-        for(Assn3223 as : assn2s)
-        {
-            if(!as.equals(a))
+        for (Assn3223 as : assn2s) {
+            if (!as.equals(a))
                 data.add(as);
 
         }
         return Result.success(data);
     }
 
+
+    @PostMapping("/addAssn/assn0")
+    public Result add0(@RequestBody Assn0 assn2) {
+        int s1 = assn2.getSource1();
+        int s2 = assn2.getSource2();
+        Assn0 a2 = assn0Repository.findAssn2BySource1AndAndSource2(s1, s2);
+        if (a2 != null)
+            return Result.success(assn0Repository.findAll());
+        Assn0 a = new Assn0();
+        a.setSource1(assn2.getSource1());
+        a.setSource2(assn2.getSource2());
+        Assn0 assn = assn0Repository.findAssn2BySource1(s1);
+        if (assn != null) {
+            assn.setSource1(-1);
+            if (assn.getSource2() == -1)
+                assn0Repository.delete(assn);
+            else
+                assn0Repository.save(assn);
+        }
+        assn = assn0Repository.findAssn2BySource2(s2);
+        if (assn != null) {
+            assn.setSource2(-1);
+            if (assn.getSource1() == -1)
+                assn0Repository.delete(assn);
+            else
+                assn0Repository.save(assn);
+        }
+        assn0Repository.save(a);
+        List<Assn0> data = new ArrayList<>();
+        data.add(a);
+        List<Assn0> assn2s = assn0Repository.findAll();
+        for (Assn0 as : assn2s) {
+            if (!as.equals(a))
+                data.add(as);
+
+        }
+        return Result.success(data);
+    }
+
+
+    @PostMapping("/addAssn/assn88")
+    public Result add88(@RequestBody Assn88 assn2) {
+        int s1 = assn2.getSource1();
+        int s2 = assn2.getSource2();
+        Assn88 a2 = assn88Repository.findAssn2BySource1AndAndSource2(s1, s2);
+        if (a2 != null)
+            return Result.success(assn88Repository.findAll());
+        Assn88 a = new Assn88();
+        a.setSource1(assn2.getSource1());
+        a.setSource2(assn2.getSource2());
+        Assn88 assn = assn88Repository.findAssn2BySource1(s1);
+        if (assn != null) {
+            assn.setSource1(-1);
+            if (assn.getSource2() == -1)
+                assn88Repository.delete(assn);
+            else
+                assn88Repository.save(assn);
+        }
+        assn = assn88Repository.findAssn2BySource2(s2);
+        if (assn != null) {
+            assn.setSource2(-1);
+            if (assn.getSource1() == -1)
+                assn88Repository.delete(assn);
+            else
+                assn88Repository.save(assn);
+        }
+        assn88Repository.save(a);
+        List<Assn88> data = new ArrayList<>();
+        data.add(a);
+        List<Assn88> assn2s = assn88Repository.findAll();
+        for (Assn88 as : assn2s) {
+            if (!as.equals(a))
+                data.add(as);
+
+        }
+        return Result.success(data);
+    }
+
+    @PostMapping("/addAssn/assn2619")
+    public Result add2619(@RequestBody Assn2619 assn2) {
+        int s1 = assn2.getSource1();
+        int s2 = assn2.getSource2();
+        Assn2619 a2 = assn2619Repository.findAssn2BySource1AndAndSource2(s1, s2);
+        if (a2 != null)
+            return Result.success(assn2619Repository.findAll());
+        Assn2619 a = new Assn2619();
+        a.setSource1(assn2.getSource1());
+        a.setSource2(assn2.getSource2());
+        Assn2619 assn = assn2619Repository.findAssn2BySource1(s1);
+        if (assn != null) {
+            assn.setSource1(-1);
+            if (assn.getSource2() == -1)
+                assn2619Repository.delete(assn);
+            else
+                assn2619Repository.save(assn);
+        }
+        assn = assn2619Repository.findAssn2BySource2(s2);
+        if (assn != null) {
+            assn.setSource2(-1);
+            if (assn.getSource1() == -1)
+                assn2619Repository.delete(assn);
+            else
+                assn2619Repository.save(assn);
+        }
+        assn2619Repository.save(a);
+        List<Assn2619> data = new ArrayList<>();
+        data.add(a);
+        List<Assn2619> assn2s = assn2619Repository.findAll();
+        for (Assn2619 as : assn2s) {
+            if (!as.equals(a))
+                data.add(as);
+
+        }
+        return Result.success(data);
+    }
+
+
     @PostMapping("/updateAssn/assn1054")
-    public Result update1054(@RequestBody Assn1054 assn3)
-    {
+    public Result update1054(@RequestBody Assn1054 assn3) {
         Assn1054 a = assn1054Repository.findBySource1AndSource2AndSource3AndSource4AndSource5(assn3.getSource1(), assn3.getSource2(), assn3.getSource3(), assn3.getSource4(), assn3.getSource5());
         int s1 = assn3.getSource1();
         int s2 = assn3.getSource2();
@@ -467,9 +640,138 @@ public class AssnController {
         List<Assn3223> data = new ArrayList<>();
         data.add(a);
         List<Assn3223> assn2s = assn3223Repository.findAll();
-        for(Assn3223 as : assn2s)
-        {
-            if(!as.equals(a))
+        for (Assn3223 as : assn2s) {
+            if (!as.equals(a))
+                data.add(as);
+
+        }
+        return Result.success(data);
+    }
+
+    @PostMapping("/updateAssn/assn0")
+    public Result update0(@RequestBody Assn0 assn2) {
+
+        int s1 = assn2.getSource1();
+        int s2 = assn2.getSource2();
+        Assn0 a = new Assn0();
+        a.setSource1(assn2.getSource1());
+        a.setSource2(assn2.getSource2());
+        Assn0 assn;
+        if (s1 != -1) {
+            assn = assn0Repository.findAssn2BySource1(s1);
+            if (assn == null)
+                return Result.error("404", "没有这条记录！");
+            assn.setSource1(-1);
+
+            if (assn.getSource2() == -1)
+                assn0Repository.delete(assn);
+            else
+                assn0Repository.save(assn);
+        }
+        if (s2 != -1) {
+            assn = assn0Repository.findAssn2BySource2(s2);
+            if (assn == null)
+                return Result.error("404", "没有这条记录！");
+            assn.setSource2(-1);
+            if (assn.getSource1() == -1)
+                assn0Repository.delete(assn);
+            else
+                assn0Repository.save(assn);
+        }
+        assn0Repository.save(a);
+
+        List<Assn0> data = new ArrayList<>();
+        data.add(a);
+        List<Assn0> assn2s = assn0Repository.findAll();
+        for (Assn0 as : assn2s) {
+            if (!as.equals(a))
+                data.add(as);
+
+        }
+        return Result.success(data);
+    }
+
+
+    @PostMapping("/updateAssn/assn88")
+    public Result update88(@RequestBody Assn88 assn2) {
+
+        int s1 = assn2.getSource1();
+        int s2 = assn2.getSource2();
+        Assn88 a = new Assn88();
+        a.setSource1(assn2.getSource1());
+        a.setSource2(assn2.getSource2());
+        Assn88 assn;
+        if (s1 != -1) {
+            assn = assn88Repository.findAssn2BySource1(s1);
+            if (assn == null)
+                return Result.error("404", "没有这条记录！");
+            assn.setSource1(-1);
+
+            if (assn.getSource2() == -1)
+                assn88Repository.delete(assn);
+            else
+                assn88Repository.save(assn);
+        }
+        if (s2 != -1) {
+            assn = assn88Repository.findAssn2BySource2(s2);
+            if (assn == null)
+                return Result.error("404", "没有这条记录！");
+            assn.setSource2(-1);
+            if (assn.getSource1() == -1)
+                assn88Repository.delete(assn);
+            else
+                assn88Repository.save(assn);
+        }
+        assn88Repository.save(a);
+
+        List<Assn88> data = new ArrayList<>();
+        data.add(a);
+        List<Assn88> assn2s = assn88Repository.findAll();
+        for (Assn88 as : assn2s) {
+            if (!as.equals(a))
+                data.add(as);
+
+        }
+        return Result.success(data);
+    }
+
+    @PostMapping("/updateAssn/assn2619")
+    public Result update2619(@RequestBody Assn2619 assn2) {
+
+        int s1 = assn2.getSource1();
+        int s2 = assn2.getSource2();
+        Assn2619 a = new Assn2619();
+        a.setSource1(assn2.getSource1());
+        a.setSource2(assn2.getSource2());
+        Assn2619 assn;
+        if (s1 != -1) {
+            assn = assn2619Repository.findAssn2BySource1(s1);
+            if (assn == null)
+                return Result.error("404", "没有这条记录！");
+            assn.setSource1(-1);
+
+            if (assn.getSource2() == -1)
+                assn2619Repository.delete(assn);
+            else
+                assn2619Repository.save(assn);
+        }
+        if (s2 != -1) {
+            assn = assn2619Repository.findAssn2BySource2(s2);
+            if (assn == null)
+                return Result.error("404", "没有这条记录！");
+            assn.setSource2(-1);
+            if (assn.getSource1() == -1)
+                assn2619Repository.delete(assn);
+            else
+                assn2619Repository.save(assn);
+        }
+        assn2619Repository.save(a);
+
+        List<Assn2619> data = new ArrayList<>();
+        data.add(a);
+        List<Assn2619> assn2s = assn2619Repository.findAll();
+        for (Assn2619 as : assn2s) {
+            if (!as.equals(a))
                 data.add(as);
 
         }
@@ -477,8 +779,7 @@ public class AssnController {
     }
 
     @PostMapping("/delAssn/assn1054")
-    public Result del1054(@RequestBody Assn1054 assn3)
-    {
+    public Result del1054(@RequestBody Assn1054 assn3) {
         int s1 = assn3.getSource1();
         int s2 = assn3.getSource2();
         int s3 = assn3.getSource3();
@@ -585,6 +886,98 @@ public class AssnController {
         return Result.success(ret);
     }
 
+    @PostMapping("/delAssn/assn0")
+    public Result del0(@RequestBody Assn0 assn2) {
+        int id = assn2.getId();
+        System.out.println(id);
+        Boolean res = assn0Repository.existsById(id);
+        if (!res)
+            return Result.error("404", "该记录不存在！");
+        else {
+            Assn0 assn = assn0Repository.findById(id).get();
+            if ((assn.getSource1() == -1) || (assn.getSource2() == -1)) {
+                return Result.success(assn0Repository.findAll()
+                        .stream()
+                        .sorted(Comparator.comparingInt(Assn0::getSource1).reversed())
+                        .toList());
+            }
+            int source2 = assn.getSource2();
+            assn.setSource2(-1);
+            assn0Repository.save(assn);
+            assn = new Assn0();
+            assn.setSource2(source2);
+            assn.setSource1(-1);
+            assn0Repository.save(assn);
+
+        }
+        List<Assn0> ret = assn0Repository.findAll()
+                .stream()
+                .sorted(Comparator.comparingInt(Assn0::getSource1).reversed())
+                .toList();
+        return Result.success(ret);
+    }
+
+    @PostMapping("/delAssn/assn88")
+    public Result del88(@RequestBody Assn88 assn2) {
+        int id = assn2.getId();
+        System.out.println(id);
+        Boolean res = assn88Repository.existsById(id);
+        if (!res)
+            return Result.error("404", "该记录不存在！");
+        else {
+            Assn88 assn = assn88Repository.findById(id).get();
+            if ((assn.getSource1() == -1) || (assn.getSource2() == -1)) {
+                return Result.success(assn88Repository.findAll()
+                        .stream()
+                        .sorted(Comparator.comparingInt(Assn88::getSource1).reversed())
+                        .toList());
+            }
+            int source2 = assn.getSource2();
+            assn.setSource2(-1);
+            assn88Repository.save(assn);
+            assn = new Assn88();
+            assn.setSource2(source2);
+            assn.setSource1(-1);
+            assn88Repository.save(assn);
+
+        }
+        List<Assn88> ret = assn88Repository.findAll()
+                .stream()
+                .sorted(Comparator.comparingInt(Assn88::getSource1).reversed())
+                .toList();
+        return Result.success(ret);
+    }
+
+    @PostMapping("/delAssn/assn2619")
+    public Result del2619(@RequestBody Assn2619 assn2) {
+        int id = assn2.getId();
+        System.out.println(id);
+        Boolean res = assn2619Repository.existsById(id);
+        if (!res)
+            return Result.error("404", "该记录不存在！");
+        else {
+            Assn2619 assn = assn2619Repository.findById(id).get();
+            if ((assn.getSource1() == -1) || (assn.getSource2() == -1)) {
+                return Result.success(assn2619Repository.findAll()
+                        .stream()
+                        .sorted(Comparator.comparingInt(Assn2619::getSource1).reversed())
+                        .toList());
+            }
+            int source2 = assn.getSource2();
+            assn.setSource2(-1);
+            assn2619Repository.save(assn);
+            assn = new Assn2619();
+            assn.setSource2(source2);
+            assn.setSource1(-1);
+            assn2619Repository.save(assn);
+
+        }
+        List<Assn2619> ret = assn2619Repository.findAll()
+                .stream()
+                .sorted(Comparator.comparingInt(Assn2619::getSource1).reversed())
+                .toList();
+        return Result.success(ret);
+    }
 
 
     public JSONArray runPython(String table, List<String> weights) throws IOException, InterruptedException {
