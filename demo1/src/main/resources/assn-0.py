@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 import mysql.connector
-from scipy.spatial.distance import directed_hausdorff
 import sys
 
 # 各信源航迹批号统计
@@ -21,7 +20,6 @@ def source_dic(source_batch, source, dic):
         # 向字典中存入一条信息
         dic[b] = track
 
-#读取数据库
 def getDate(source):
   # 建立数据库连接
   mydb = mysql.connector.connect(
@@ -39,7 +37,7 @@ def getDate(source):
     # 执行SQL查询
   mycursor.execute(
     "SELECT source,batch,time_min,time_max,duration,min_lon,max_lon,min_lat,max_lat,avg_vel,avg_accel,avg_cou,avg_anguvel,points,sparsity"+
-    " FROM `1054-features-normalized`"+
+    " FROM `0-features-normalized`"+
     " WHERE source="+source)
 
   # 获取查询结果
@@ -70,7 +68,7 @@ def getPointDate():
   mycursor = mydb.cursor()
 
     # 执行SQL查询
-  mycursor.execute("SELECT batch,source,time,lat,lon,vel,cou FROM `1054-points`")
+  mycursor.execute("SELECT batch,source,time,lat,lon,vel,cou FROM `0-points`")
 
   # 获取查询结果
   myresult = mycursor.fetchall()
@@ -122,74 +120,49 @@ def association(batch1, batch2, batch_num1, batch_num2, feature_1, feature_2, co
     a_assn[f'{source2}'] = dic[f'{source2}']
     return (a_assn)
 
-
 """
 关联判断流程：
 1.读取两信源特征文件
 2.对所有航迹进行特征值欧式距离计算，测试各特征值权重
 3.输出关联结果，找到最优结果
 """
-scene_index = 1054  # 定义场景文件序号
+# 定义场景文件序号
+scene_index = 0 
 
-# 1.读取所有信源特征文件
+#从数据库读取数据
 feature_9001=getDate("9001")
 feature_9002=getDate("9002")
-feature_9003=getDate("9003")
-feature_9004=getDate("9004")
-feature_9005=getDate("9005")
+#print(feature_9001)
 
-# 2.统计所有特征名
+# 对所有航迹进行特征值欧式距离计算
 columns = list(feature_9001.columns)  # 统计所有特征名
-columns.pop(0)
+columns.pop(0) 
 columns.pop(0)
 columns.remove('points')
 columns.remove('sparsity')
+#print(columns)
 
-# 创建权重列表
+#接收weights的参数
 weights=[]
 for item in sys.argv[1:]:
     weights.append(float(item))
 #print(weights)
 
-# 获取所有信源的批号列表
+# 获取两信源所有批号
 batch_9001 = feature_9001['batch'].unique().tolist()  # 9001所有批号
 batch_9002 = feature_9002['batch'].unique().tolist()  # 9002所有批号
-batch_9003 = feature_9003['batch'].unique().tolist()  # 9003所有批号
-batch_9004 = feature_9004['batch'].unique().tolist()  # 9003所有批号
-batch_9005 = feature_9005['batch'].unique().tolist()  # 9003所有批号
 
-# 获取所有信源的批号数量
+# 获取两信源批号数量
 batch_9001_num = len(batch_9001)
 batch_9002_num = len(batch_9002)
-batch_9003_num = len(batch_9003)
-batch_9004_num = len(batch_9004)
-batch_9005_num = len(batch_9005)
 
-# 关联
+# 9001和9002的关联结果
 assn_1_2 = association(batch_9001, batch_9002, batch_9001_num, batch_9002_num, feature_9001, feature_9002, columns,
                        9001, 9002, weights)
-# print(assn_1_2)
 
-assn_1_3 = association(batch_9001, batch_9003, batch_9001_num, batch_9003_num, feature_9001, feature_9003, columns,
-                       9001, 9003, weights)
-# print(assn_1_3)
-
-assn_1_4 = association(batch_9001, batch_9004, batch_9001_num, batch_9004_num, feature_9001, feature_9004, columns,
-                       9001, 9004, weights)
-# print(assn_1_4)
-
-assn_1_5 = association(batch_9001, batch_9005, batch_9001_num, batch_9005_num, feature_9001, feature_9005, columns,
-                       9001, 9005, weights)
-# print(assn_1_5)
-
-
-# 导出
 assn_all = pd.DataFrame(columns=['9001'])
 assn_all['9001'] = batch_9001
 assn_all = pd.merge(assn_all, assn_1_2, how='left', on='9001')
-assn_all = pd.merge(assn_all, assn_1_3, how='left', on='9001')
-assn_all = pd.merge(assn_all, assn_1_4, how='left', on='9001')
-assn_all = pd.merge(assn_all, assn_1_5, how='left', on='9001')
 
 # 将nan使用-1填充
 assn_all = assn_all.where((assn_all.notna()), -1)
@@ -200,22 +173,17 @@ assn_all = assn_all.reset_index(drop=True)
 diff_9002 = list(set(batch_9002) - set(assn_all['9002'].tolist()))
 #print(diff_9002)
 
-diff_9003 = list(set(batch_9003) - set(assn_all['9003'].tolist()))
-#print(diff_9003)
-
-diff_9004 = list(set(batch_9004) - set(assn_all['9004'].tolist()))
-#print(diff_9004)
-
-diff_9005 = list(set(batch_9005) - set(assn_all['9005'].tolist()))
-#print(diff_9005)
-
 # 如果有多余航迹，就把他们放进列表
 if diff_9002 != []:
-    df_piece = pd.DataFrame(columns=['9001', '9002', '9003', '9004', '9005'])
+    df_piece = pd.DataFrame(columns=['9001', '9002'])
     df_piece['9002'] = diff_9002
     df_piece = df_piece.where((df_piece.notna()), -1)
     #print(df_piece)
     assn_all = assn_all.append(df_piece, ignore_index=True)
+    #显示所有行
+# pd.set_option('display.max_rows', None)
+# for row in range(1,len(assn_all)):
+#     print(str(assn_all.iloc[row][0])+','+str(assn_all.iloc[row][1]))
 
 # 3.计算置信度
 csv_df = getPointDate()

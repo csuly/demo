@@ -47,11 +47,14 @@ public class AssnController {
         this.assn2619Repository = assn2619Repository;
     }
 
-    @GetMapping("/getAssn")
-    public GerAssnlistResult getPoints(@RequestParam("scene") int scene,@RequestParam("weights") String weights) throws IOException, InterruptedException
+//    @GetMapping("/getAssn")
+//    public GerAssnlistResult getPoints(@RequestParam("scene") int scene,@RequestParam("weights") String weights) throws IOException, InterruptedException
+    @PostMapping ("/getAssn")
+    public GerAssnlistResult getPoints(@RequestBody JSONObject obj)
     {
+        int scene=obj.getInteger("scene");
         JSONArray data=new JSONArray();
-        List<String>weight=Arrays.asList(weights.split(","));
+        JSONArray weight=obj.getJSONArray("weights");
         System.out.println(weight);
         int length=weight.size();
         try
@@ -980,10 +983,10 @@ public class AssnController {
     }
 
 
-    public JSONArray runPython(String table, List<String> weights) throws IOException, InterruptedException {
+    public JSONArray runPython(String table, JSONArray weights) throws IOException, InterruptedException {
         //String scriptPath = "/root/python/4/assn-"+table+".py";
         String scriptPath = "/home/ubuntu/python/assn-" + table + ".py";
-        String[] argument = new String[]{"/home/ubuntu/anaconda3/envs/myenv/bin/python", scriptPath, weights.get(0), weights.get(1), weights.get(2), weights.get(3), weights.get(4), weights.get(5), weights.get(6), weights.get(7), weights.get(8), weights.get(9), weights.get(10)};
+        String[] argument = new String[]{"/home/ubuntu/anaconda3/envs/myenv/bin/python", scriptPath, weights.getString(0), weights.getString(1), weights.getString(2), weights.getString(3), weights.getString(4), weights.getString(5), weights.getString(6), weights.getString(7), weights.getString(8), weights.getString(9), weights.getString(10)};
 
         JSONArray result = new JSONArray();
         try {
